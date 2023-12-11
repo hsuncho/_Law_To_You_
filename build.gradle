@@ -92,8 +92,6 @@ compileQuerydsl {
 //querydsl 추가 끝
 
 
-
-
 tasks.named('bootBuildImage') {
 	builder = 'paketobuildpacks/builder-jammy-base:latest'
 }
