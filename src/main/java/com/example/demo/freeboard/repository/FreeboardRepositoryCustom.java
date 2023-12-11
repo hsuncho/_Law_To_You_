@@ -8,4 +8,5 @@ public interface FreeboardRepositoryCustom {
 
     List<Freeboard> findByContent(String content);
 
+
 }

@@ -57,6 +57,7 @@ public class Lawyer {
     // 댓글 (reply)
     @OneToMany(mappedBy = "lawyer", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
+
     private List<Reply> replyList = new ArrayList<>();
 
     // 답변(answer)

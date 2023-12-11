@@ -12,7 +12,7 @@ import java.util.List;
 
 @Getter
 @Setter
-@ToString
+@ToString(exclude = "user")
 @EqualsAndHashCode(of = "consultNum")
 @NoArgsConstructor
 @AllArgsConstructor
@@ -59,15 +59,14 @@ public class Consulting {
     @Builder.Default
     private List<Answer> answerList = new ArrayList<>();
 
-    
     // 온라인 상담 요청 글 첨부파일
-    @OneToMany(mappedBy = "consulting", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
+    @OneToMany(mappedBy = "consulting", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ConsultingFile> answerFiles = new ArrayList<>();
 
     // 깊은 상담 첨부파일
-    @OneToMany(mappedBy = "consulting", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
+    @OneToMany(mappedBy = "consulting", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<DetailedConsultingFile> detailedAnswerFiles = new ArrayList<>();
 
 }

@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Getter @Setter
-@ToString
+@ToString(exclude = {"lawyer", "consulting"})
 @EqualsAndHashCode(of = "answerNum")
 @NoArgsConstructor
 @AllArgsConstructor
@@ -56,8 +56,8 @@ public class Answer {
     private Consulting consulting;
     
     // 답변 첨부파일
-    @OneToMany(mappedBy = "answer", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
+    @OneToMany(mappedBy = "answer", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<AnswerFile> answerFiles = new ArrayList<>();
 
 }

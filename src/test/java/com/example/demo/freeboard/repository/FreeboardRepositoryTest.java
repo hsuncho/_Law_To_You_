@@ -90,6 +90,7 @@ class FreeboardRepositoryTest {
 
     }
 
+
     @Test
     @DisplayName("게시판 상세 글 불러오기")
     void detailTest() {
@@ -101,5 +102,6 @@ class FreeboardRepositoryTest {
         //then
         System.out.println("글 불러오기:" + result);
     }
+
 
 }

@@ -7,7 +7,7 @@ import javax.persistence.*;
 
 @Getter
 @Setter
-@ToString
+@ToString(exclude = "consulting")
 @EqualsAndHashCode(of = "fileNum")
 @NoArgsConstructor
 @AllArgsConstructor

@@ -23,7 +23,7 @@ public class User {
     @Column(name = "user_id")
     private String id;
 
-    @Column(nullable = false)
+    @Column(nullable = false, name = "user_pw")
     private String password;
 
     @Column(nullable = false, unique = true)
@@ -46,18 +46,18 @@ public class User {
     private String refreshToken;
     
     // 온라인 상담 글
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Consulting> consultingList = new ArrayList<>();
 
     // 자유게시판
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Freeboard> freeboardList = new ArrayList<>();
 
     // 댓글
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Reply> replyList = new ArrayList<>();
 
 

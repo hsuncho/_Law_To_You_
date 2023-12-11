@@ -22,5 +22,4 @@ public class FreeboardRepositoryImpl implements FreeboardRepositoryCustom {
                 .fetch();
     }
 
-
 }
