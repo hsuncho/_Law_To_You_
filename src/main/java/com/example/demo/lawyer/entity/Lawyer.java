@@ -50,13 +50,14 @@ public class Lawyer {
     private String refreshToken;
 
     // 자유게시판 (freeboard)
-    @Builder.Default
     @OneToMany(mappedBy = "lawyer", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
     private List<Freeboard> freeboardList = new ArrayList<>();
 
     // 댓글 (reply)
-    @Builder.Default
     @OneToMany(mappedBy = "lawyer", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+
     private List<Reply> replyList = new ArrayList<>();
 
     // 답변(answer)

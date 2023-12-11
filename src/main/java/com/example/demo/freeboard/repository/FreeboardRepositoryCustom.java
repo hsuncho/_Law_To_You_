@@ -6,8 +6,6 @@ import java.util.List;
 
 public interface FreeboardRepositoryCustom {
 
-    List<Freeboard> findByWriter(String writer);
-
     List<Freeboard> findByContent(String content);
 
 

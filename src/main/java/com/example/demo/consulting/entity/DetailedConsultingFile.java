@@ -1,6 +1,7 @@
 package com.example.demo.consulting.entity;
 
 import lombok.*;
+
 import org.eclipse.jdt.internal.compiler.tool.EclipseCompiler;
 
 import javax.persistence.*;

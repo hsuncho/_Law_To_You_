@@ -30,7 +30,7 @@ class FreeboardRepositoryTest {
         Freeboard freeboard = Freeboard.builder()
                 .writer("김스프링")
                 .title("춘식이는 왜 춘식이일까??")
-                .content("그것은 춘식이기때문이야~")
+                .content("그것은 춘식이기때문")
                 .build();
         //when
         Freeboard saved = freeboardRepository.save(freeboard);
@@ -73,23 +73,23 @@ class FreeboardRepositoryTest {
         //then
         freeboard.forEach(System.out::println);
 
-        assertEquals(5, freeboard.size());
+        assertEquals(2, freeboard.size());
 
     }
-//    @Test
-//    @DisplayName("게시글 검색(QueryDSL사용)")
-//    void searchTest() {
-//        //given
-//        String writer = "김스프링";
-//        //when
-//        List<Freeboard> result = freeboardRepository.findByWriter(writer);
-//        //then
-//        System.out.println(result);
-//        assertEquals(2, result.size());
-//
-//        result.forEach(System.out::println);
-//
-//    }
+    @Test
+    @DisplayName("게시글 검색(QueryDSL사용)")
+    void searchTest() {
+        //given
+        String content = "춘식이";
+        //when
+        List<Freeboard> result = freeboardRepository.findByContent(content);
+        //then
+        System.out.println(result);
+        assertEquals(2, result.size());
+        assertEquals("김춘식", result.get(0).getWriter());
+
+    }
+
 
     @Test
     @DisplayName("게시판 상세 글 불러오기")
@@ -101,20 +101,6 @@ class FreeboardRepositoryTest {
 
         //then
         System.out.println("글 불러오기:" + result);
-    }
-
-    @Test
-    @DisplayName("게시글 검색(QueryDSL사용)")
-    void searchTest() {
-        //given
-        String content = "춘식이";
-        //when
-        List<Freeboard> result = freeboardRepository.findByContent(content);
-        //then
-        System.out.println(result);
-        assertEquals(3, result.size());
-        assertEquals("park1234", result.get(0).getWriter());
-
     }
 
 

@@ -58,7 +58,7 @@ public class Consulting {
     @OneToMany(mappedBy = "consulting", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<Answer> answerList = new ArrayList<>();
-    
+
     // 온라인 상담 요청 글 첨부파일
     @Builder.Default
     @OneToMany(mappedBy = "consulting", cascade = CascadeType.ALL, orphanRemoval = true)

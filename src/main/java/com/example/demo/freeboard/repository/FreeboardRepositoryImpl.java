@@ -15,18 +15,11 @@ public class FreeboardRepositoryImpl implements FreeboardRepositoryCustom {
     private final JPAQueryFactory queryFactory;
 
     @Override
-    public List<Freeboard> findByWriter(String writer) {
-        return queryFactory
-                .selectFrom(freeboard)
-                .where(freeboard.writer.eq(writer))
-                .fetch();
-    }
-
-    @Override
     public List<Freeboard> findByContent(String content) {
         return queryFactory
                 .selectFrom(freeboard)
                 .where(freeboard.content.contains(content))
                 .fetch();
     }
+
 }
