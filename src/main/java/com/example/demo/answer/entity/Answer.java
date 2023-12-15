@@ -2,8 +2,7 @@ package com.example.demo.answer.entity;
 
 
 import com.example.demo.consulting.entity.Consulting;
-import com.example.demo.freeboard.entity.Freeboard;
-import com.example.demo.lawyer.entity.Lawyer;
+import com.example.demo.member.lawyer.entity.Lawyer;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 

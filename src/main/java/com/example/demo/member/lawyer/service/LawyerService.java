@@ -1,0 +1,73 @@
+package com.example.demo.member.lawyer.service;
+
+
+import com.example.demo.member.lawyer.dto.request.LawyerJoinRequestDTO;
+import com.example.demo.member.lawyer.dto.response.LawyerJoinResponseDTO;
+import com.example.demo.member.lawyer.entity.Lawyer;
+import com.example.demo.member.lawyer.repository.LawyerRepository;
+import com.example.demo.member.user.service.UserService;
+import com.example.demo.token.auth.TokenProvider;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.UUID;
+
+@Service
+@RequiredArgsConstructor
+@Slf4j
+public class LawyerService {
+    private final LawyerRepository lawyerRepository;
+    private final TokenProvider tokenProvider;
+    private final PasswordEncoder passwordEncoder;
+    private final UserService userService;
+
+    @Value("${upload.path}")
+    private String uploadRootPath;
+
+    // 회원가입(변호사)
+    public LawyerJoinResponseDTO createLawyer(
+            final LawyerJoinRequestDTO dto
+            ,final String uploadedFilePath
+    ) {
+        String id = dto.getLawyerId();
+        String email = dto.getEmail();
+
+        if(userService.isDuplicateId(id)) {
+            log.warn("아이디가 중복되었습니다. - {}", id);
+        }
+
+        if(userService.isDuplicateEmail(email)) {
+            log.warn("이메일이 중복되었습니다. - {}", email);
+        }
+
+        String encoded = passwordEncoder.encode(dto.getLawyerPw());
+        dto.setLawyerPw(encoded);
+
+        Lawyer saved = lawyerRepository.save(dto.toEntity(uploadedFilePath));
+        log.info("변호사 회원 가입 정상 수행됨! - saved lawyer - {}", saved);
+
+        return new LawyerJoinResponseDTO(saved);
+    }
+    
+    // 업로드된 파일을 서버에 저장하고 저장 경로를 리턴
+    public String uploadAttachedFile(MultipartFile attachedFile) throws IOException {
+
+        File rootDir = new File(uploadRootPath);
+        if(!rootDir.exists()) rootDir.mkdirs();
+
+        String uniqueFileName
+                = UUID.randomUUID() + "_" + attachedFile.getOriginalFilename();
+
+        File uploadFile = new File(uploadRootPath + "/" + uniqueFileName);
+        attachedFile.transferTo(uploadFile);
+
+        return uniqueFileName;
+    }
+
+}

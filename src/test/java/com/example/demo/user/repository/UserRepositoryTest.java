@@ -1,7 +1,11 @@
 package com.example.demo.user.repository;
 
-import com.example.demo.lawyer.repository.LawyerRepository;
-import com.example.demo.user.entity.User;
+import com.example.demo.member.Member;
+import com.example.demo.member.MemberRepository;
+import com.example.demo.member.user.repository.UserRepository;
+import com.example.demo.member.lawyer.repository.LawyerRepository;
+import com.example.demo.member.user.entity.User;
+import com.example.demo.token.auth.TokenProvider;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,15 +26,21 @@ class UserRepositoryTest {
     @Autowired
     LawyerRepository lawyerRepository;
 
+    @Autowired
+    TokenProvider tokenProvider;
+
+    @Autowired
+    MemberRepository memberRepository;
+
     @Test
     @DisplayName("join test(사용자)")
     void saveTest() {
         //given
         User newUser = User.builder()
-                .id("park1234")
+                .id("ppp1234")
                 .password("aaa1111!")
-                .nickname("박영희")
-                .email("park1234@google.com")
+                .nickname("야옹이")
+                .email("ppp1234@naver.com")
                 .joinMethod("web")
                 .build();
 
@@ -80,5 +90,8 @@ class UserRepositoryTest {
         //then
         assertTrue(flag);
     }
+
+    
+
     
 }

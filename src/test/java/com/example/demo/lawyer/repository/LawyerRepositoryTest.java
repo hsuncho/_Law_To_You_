@@ -1,7 +1,8 @@
 package com.example.demo.lawyer.repository;
 
-import com.example.demo.lawyer.entity.Lawyer;
-import com.example.demo.user.repository.UserRepository;
+import com.example.demo.member.lawyer.entity.Lawyer;
+import com.example.demo.member.lawyer.repository.LawyerRepository;
+import com.example.demo.member.user.repository.UserRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
