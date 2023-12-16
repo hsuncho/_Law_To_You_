@@ -38,21 +38,21 @@ public class JwtMemberFilter extends OncePerRequestFilter {
             log.info("JWT Token Filter 작동중 - token: {}", token);
 
             // 토큰 위조 검사 및 인증 완료
-            if(token != null && !token.equals("null")) {
+            if (token != null && !token.equals("null")) {
                 TokenMemberInfo memberInfo = tokenProvider.validateAndGetTokenMemberInfo(token);
 
                 // 인가 정보 리스트
                 // 권한 체크에 사용할 필드 authority 추가함
                 List<SimpleGrantedAuthority> authorityList = new ArrayList<>();
-                authorityList.add(new SimpleGrantedAuthority("ROLE_"+memberInfo.getAuthority().toString()));
-                
+                authorityList.add(new SimpleGrantedAuthority("ROLE_" + memberInfo.getAuthority().toString()));
+
                 // 인증 완료 처리
                 // 스프링 시큐리티에게 인증 정보 전달해서 인증 정보를 활용할 수 있도록 설정
                 AbstractAuthenticationToken authenticationToken
                         = new UsernamePasswordAuthenticationToken(
-                                memberInfo, // 컨트롤러에서 활용할 멤버 정보
-                                null, // 인증된 사용자 비밀번호
-                                authorityList // 인가 정보(권한 정보)
+                        memberInfo, // 컨트롤러에서 활용할 멤버 정보
+                        null, // 인증된 사용자 비밀번호
+                        authorityList // 인가 정보(권한 정보)
                 );
 
                 // 인증 완료 처리 시 클라이언트의 요청 정보 세팅
