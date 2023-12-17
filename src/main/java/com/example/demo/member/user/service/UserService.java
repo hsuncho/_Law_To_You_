@@ -13,20 +13,22 @@ import com.example.demo.member.user.repository.UserRepository;
 import com.example.demo.token.auth.TokenMemberInfo;
 import com.example.demo.token.auth.TokenProvider;
 import com.example.demo.token.dto.TokenDTO;
+import jdk.jshell.Snippet;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.client.RestTemplate;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.util.Map;
+import java.util.Optional;
 
 
 @Service
@@ -66,22 +68,6 @@ public class UserService {
     // 회원 가입 처리(사용자)
     public UserJoinResponseDTO createUser(final UserJoinRequestDTO dto) {
 
-        String id = dto.getId();
-        String email = dto.getEmail();
-        String nickname = dto.getNickname();
-
-        if(isDuplicateId(id)) {
-            log.warn("아이디가 중복되었습니다. - {}", id);
-        }
-
-        if(isDuplicateEmail(email)) {
-            log.warn("이메일이 중복되었습니다. - {}", email);
-        }
-
-        if(isDuplicateNickname(nickname)) {
-            log.warn("닉네임이 중복되었습니다. - {}", nickname);
-        }
-
         String encoded = passwordEncoder.encode(dto.getPassword());
         dto.setPassword(encoded);
 
@@ -95,8 +81,10 @@ public class UserService {
         return responseDTO;
     }
 
-
-    public LoginResponseDTO authenticate(final LoginRequestDTO dto) {
+    public LoginResponseDTO authenticate(
+            HttpServletResponse response,
+            final LoginRequestDTO dto
+    ) {
         
         // 아이디를 통해 회원 정보 조회
         Member member = memberRepository.findById(dto.getId()).orElseThrow(
@@ -105,13 +93,12 @@ public class UserService {
 
         log.info("\n\n\n로그인 요청 한 회원: {}\n\n\n", member.getId());
         
-        // authority로 member에서 user인지 lawyer인지 확인 후 비밀번호 얻기
+        // 비밀번호 얻기
         String password = null;
         if(member.getAuthority().equals("user")) {
-            password = member.getUser().getPassword();
-
+            password =  member.getUser().getPassword();
         } else if(member.getAuthority().equals("lawyer")) {
-            password = member.getLawyer().getLawyerPw();
+            password =  member.getLawyer().getLawyerPw();
         }
         log.info("\n\n\n비밀번호: {}\n\n\n", password);
 
@@ -122,16 +109,51 @@ public class UserService {
         if(!passwordEncoder.matches(rawPassword, encodedPassword)) {
             throw new RuntimeException("비밀번호가 틀렸습니다.");
         }
-        
+
         // 아이디와 비밀번호가 일치할 경우 로그인 성공
         log.info("{}님 로그인 성공!", member.getId());
 
-        // accessToken과 refreshToken 생성
+        // 토큰 dto 생성(accessToken과 refreshToken도 생성됨)
         TokenDTO tokenDTO = tokenProvider.createToken(member);
-    
-        // DB에 refreshToken 저장
-        member.getUser().setRefreshToken(tokenDTO.getRefreshToken());
+        log.info("\n\n\n토큰 DTO가 생성됨 - {}\n\n\n", tokenDTO);
+
+        // refresh token 있는지 확인
+        String refreshToken = null;
+        if(member.getAuthority().equals("user")) {
+            refreshToken = userRepository.findById(member.getId()).orElseThrow().getRefreshToken();
+            // 있다면 새 토큰 발급 후 업데이트, 없다면 새로 만들고 저장
+            member.getUser().setRefreshToken(tokenDTO.getRefreshToken());
+
+        } else if(member.getAuthority().equals("lawyer")) {
+            refreshToken = lawyerRepository.findById(member.getId()).orElseThrow().getRefreshToken();
+            member.getLawyer().setRefreshToken(tokenDTO.getRefreshToken());
+
+        }
+        log.info("\n\n\nrefreshToken : {}\n\n\n", refreshToken);
+
+
         memberRepository.save(member);
+
+        // Response 헤더에 필요한 토큰 정보 추가하여 반환
+        response.addHeader("Authorization", "Bearer" + tokenDTO.getAccessToken());
+        response.addHeader("Refresh-Token", tokenDTO.getRefreshToken());
+        log.info("Response에 헤더 추가됨 - {}", response.getHeader("Authorization"));
+
+
+        /*
+
+        Optional<RefreshToken> refreshToken = tokenRepository.findById(dto.getId());
+
+        // 있다면 새 토큰 발급후 업데이트
+        // 없다면 새로 만들고 디비 저장
+        if(refreshToken.isPresent()) {
+            tokenRepository.save(refreshToken.get().updateToken(tokenDTO.getRefreshToken()));
+        }else {
+            RefreshToken newToken = new RefreshToken(tokenDTO.getRefreshToken(), dto.getId());
+            tokenRepository.save(newToken);
+        }
+
+         */
 
         return new LoginResponseDTO(member, tokenDTO);
 
@@ -227,17 +249,26 @@ public class UserService {
         return responseData;
     }
 
-    public String logout(final TokenMemberInfo memberInfo) {
+    public String logout(HttpServletRequest request, final TokenMemberInfo memberInfo) {
+
+        String refreshToken = request.getHeader("Refresh-Token");
+        String accessToken = request.getHeader("Authorization");
+
+        String validation = tokenProvider.validateRefreshToken(refreshToken);
+
         Member member = memberRepository.findById((memberInfo.getId())).orElseThrow();
 
-        String accessToken = null;
-
-        if(member.getAuthority().equals("user")) {
-            accessToken = member.getUser().getAccessToken();
-        } else if(member.getAuthority().equals("lawyer")) {
-            accessToken = member.getLawyer().getAccessToken();
+        if(validation == null) {
+            if(member.getAuthority().equals("user")) {
+                accessToken = member.getUser().getAccessToken();
+                member.getUser().setRefreshToken(null);
+            } else if(member.getAuthority().equals("lawyer")) {
+                accessToken = member.getLawyer().getAccessToken();
+                member.getLawyer().setRefreshToken(null);
+            }
         }
 
+        // 카카오 로그아웃
         if(member.getUser().getJoinMethod().equals("kakao")) {
             String reqUri = "https://kapi.kakao.com/v1/user/logout";
             HttpHeaders headers = new HttpHeaders();

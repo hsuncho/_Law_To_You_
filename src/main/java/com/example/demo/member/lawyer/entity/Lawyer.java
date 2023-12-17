@@ -68,4 +68,7 @@ public class Lawyer {
     @OneToOne(mappedBy = "lawyer", cascade = CascadeType.ALL, orphanRemoval = true)
     private Answer answer;
 
+    public void setRefreshToken(String token) {
+        this.refreshToken = token;
+    }
 }

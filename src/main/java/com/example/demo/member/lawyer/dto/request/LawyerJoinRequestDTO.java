@@ -25,11 +25,7 @@ public class LawyerJoinRequestDTO {
     @Email
     private String email;
 
-    @NotBlank
     private int lawyerNum;
-
-    @NotBlank
-    private String attachedFile;
 
 
     public Lawyer toEntity(String uploadFile) {

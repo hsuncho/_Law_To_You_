@@ -1,6 +1,8 @@
 package com.example.demo.member.lawyer.service;
 
 
+import com.example.demo.member.Member;
+import com.example.demo.member.MemberRepository;
 import com.example.demo.member.lawyer.dto.request.LawyerJoinRequestDTO;
 import com.example.demo.member.lawyer.dto.response.LawyerJoinResponseDTO;
 import com.example.demo.member.lawyer.entity.Lawyer;
@@ -22,29 +24,20 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @Slf4j
 public class LawyerService {
+
     private final LawyerRepository lawyerRepository;
-    private final TokenProvider tokenProvider;
     private final PasswordEncoder passwordEncoder;
-    private final UserService userService;
+    private final MemberRepository memberRepository;
+    private final TokenProvider tokenProvider;
 
     @Value("${upload.path}")
     private String uploadRootPath;
 
     // 회원가입(변호사)
     public LawyerJoinResponseDTO createLawyer(
-            final LawyerJoinRequestDTO dto
-            ,final String uploadedFilePath
+            final LawyerJoinRequestDTO dto,
+            final String uploadedFilePath
     ) {
-        String id = dto.getLawyerId();
-        String email = dto.getEmail();
-
-        if(userService.isDuplicateId(id)) {
-            log.warn("아이디가 중복되었습니다. - {}", id);
-        }
-
-        if(userService.isDuplicateEmail(email)) {
-            log.warn("이메일이 중복되었습니다. - {}", email);
-        }
 
         String encoded = passwordEncoder.encode(dto.getLawyerPw());
         dto.setLawyerPw(encoded);
@@ -52,7 +45,11 @@ public class LawyerService {
         Lawyer saved = lawyerRepository.save(dto.toEntity(uploadedFilePath));
         log.info("변호사 회원 가입 정상 수행됨! - saved lawyer - {}", saved);
 
-        return new LawyerJoinResponseDTO(saved);
+        LawyerJoinResponseDTO responseDTO = new LawyerJoinResponseDTO(saved);
+        Member member = responseDTO.insertMember(saved);
+        memberRepository.save(member);
+
+        return responseDTO;
     }
     
     // 업로드된 파일을 서버에 저장하고 저장 경로를 리턴

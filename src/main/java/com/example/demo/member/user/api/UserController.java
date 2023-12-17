@@ -13,6 +13,9 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 
 @RestController
 @Slf4j
@@ -75,6 +78,26 @@ public class UserController {
             BindingResult result
     ) {
         log.info("/api/auth POST! - {}", dto);
+
+        String id = dto.getId();
+        String email = dto.getEmail();
+        String nickname = dto.getNickname();
+
+        if(userService.isDuplicateId(id)) {
+            log.warn("아이디가 중복되었습니다. - {}", id);
+            return ResponseEntity.badRequest().body("아이디가 중복되었습니다.");
+        }
+
+        if(userService.isDuplicateEmail(email)) {
+            log.warn("이메일이 중복되었습니다. - {}", email);
+            return ResponseEntity.badRequest().body("이메일이 중복되었습니다.");
+        }
+
+        if(userService.isDuplicateNickname(nickname)) {
+            log.warn("닉네임이 중복되었습니다. - {}", nickname);
+            return ResponseEntity.badRequest().body("닉네임이 중복되었습니다.");
+        }
+
         if(result.hasErrors()) {
             log.warn(result.toString());
             return ResponseEntity.badRequest()
@@ -94,12 +117,13 @@ public class UserController {
     // 로그인 요청 처리
     @PostMapping("/login")
     public ResponseEntity<?> loginUser(
+            HttpServletResponse response,
            @RequestBody LoginRequestDTO dto
     ) {
         try{
             log.info("dto: {}", dto);
             LoginResponseDTO responseDTO
-                    = userService.authenticate(dto);
+                    = userService.authenticate(response, dto);
 
             return  ResponseEntity.ok().body(responseDTO);
 
@@ -123,23 +147,16 @@ public class UserController {
     // 로그아웃 처리
     @GetMapping("/logout")
     public ResponseEntity<?> logout(
+            HttpServletRequest request,
             @AuthenticationPrincipal TokenMemberInfo memberInfo
     ) {
         // 엑세스 만료 후 로그아웃
         log.info("/api/user/logout - GET! - member: {}", memberInfo.getId());
 
-        String result = userService.logout(memberInfo);
+        String result = userService.logout(request, memberInfo);
 
         return ResponseEntity.ok().body(result);
     }
-
-    // refreshToken 유효성 검사 및 재발급
-
-
-
-
-
-
 
 
 }

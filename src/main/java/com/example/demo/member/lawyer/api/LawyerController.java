@@ -3,6 +3,7 @@ package com.example.demo.member.lawyer.api;
 import com.example.demo.member.lawyer.dto.response.LawyerJoinResponseDTO;
 import com.example.demo.member.lawyer.service.LawyerService;
 import com.example.demo.member.lawyer.dto.request.LawyerJoinRequestDTO;
+import com.example.demo.member.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
@@ -20,6 +21,7 @@ import org.springframework.web.multipart.MultipartFile;
 public class LawyerController {
 
     private final LawyerService lawyerService;
+    private final UserService userService;
 
     // 아이디와 이메일 중복 확인 요청 처리는 /api/user로 진행됨
 
@@ -31,11 +33,28 @@ public class LawyerController {
     // 회원가입 요청
     @PostMapping("/join")
     public ResponseEntity<?> joinLawyer(
-            @Validated @RequestPart("lawyer") LawyerJoinRequestDTO dto,
-            @RequestPart(value="attachedFile") MultipartFile attachedFile,
+            @Validated @RequestPart(value = "lawyer") LawyerJoinRequestDTO dto,
+            @RequestPart(value = "attachedFile") MultipartFile attachedFile,
             BindingResult result
     ) {
         log.info("/api/lawyer POST! - {}", dto);
+
+        String id = dto.getLawyerId();
+        String email = dto.getEmail();
+
+        if(id.trim().isEmpty()) return ResponseEntity.badRequest().body("아이디는 필수값입니다!");
+        if(email.trim().isEmpty()) return ResponseEntity.badRequest().body("이메일은 필수값입니다!");
+
+        if(userService.isDuplicateId(id)) {
+            log.warn("아이디가 중복되었습니다. - {}", id);
+            return ResponseEntity.badRequest().body("아이디가 중복되었습니다.");
+        }
+
+        if(userService.isDuplicateEmail(email)) {
+            log.warn("이메일이 중복되었습니다. - {}", email);
+            return ResponseEntity.badRequest().body("이메일이 중복되었습니다.");
+
+        }
 
         if (result.hasErrors()) {
             log.warn(result.toString());
@@ -48,7 +67,7 @@ public class LawyerController {
                 if (attachedFile != null) {
                     log.info("attached file name: {}", attachedFile.getOriginalFilename());
 
-                    // 전달 받은 프로필 이미지를 먼저 지정된 경로에 저장한 후 DB 저장을 위해 경로를 받아오자
+                    // 전달 받은 이미지를 먼저 지정된 경로에 저장한 후 DB 저장을 위해 경로 받아옴
                     uploadedFilePath = lawyerService.uploadAttachedFile(attachedFile);
                 }
 
@@ -62,7 +81,6 @@ public class LawyerController {
             } catch (Exception e) {
                 e.printStackTrace();
                 log.warn("기타 예외가 발생했습니다!");
-                e.printStackTrace();
                 return ResponseEntity.internalServerError().build();
             }
 
