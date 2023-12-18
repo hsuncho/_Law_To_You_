@@ -2,6 +2,10 @@ package com.example.demo.freeboard.repository;
 
 import com.example.demo.freeboard.entity.Freeboard;
 import com.example.demo.freeboard.repository.FreeboardRepository;
+import com.example.demo.lawyer.entity.Lawyer;
+import com.example.demo.lawyer.repository.LawyerRepository;
+import com.example.demo.user.entity.User;
+import com.example.demo.user.repository.UserRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,14 +27,26 @@ class FreeboardRepositoryTest {
     @Autowired
     FreeboardRepository freeboardRepository;
 
+    @Autowired
+    UserRepository userRepository;
+
+    @Autowired
+    LawyerRepository lawyerRepository;
+
     @Test
     @DisplayName("게시판 글 작성 테스트")
     void writeTest() {
+
+        User user = userRepository.findById("park1234").orElseThrow();
+        Lawyer lawyer = lawyerRepository.findById("lll1234").orElseThrow();
+
         //given
         Freeboard freeboard = Freeboard.builder()
                 .writer("김스프링")
-                .title("춘식이는 왜 춘식이일까??")
-                .content("그것은 춘식이기때문")
+                .title("3번쨰 아아아??")
+                .content("그 춘식")
+                .user(user)
+                .lawyer(lawyer)
                 .build();
         //when
         Freeboard saved = freeboardRepository.save(freeboard);

@@ -1,6 +1,5 @@
-package com.example.demo.freeboard.dto.response;
+package com.example.demo.faq.dto;
 
-import com.example.demo.freeboard.entity.Freeboard;
 import lombok.*;
 
 import java.util.List;
@@ -12,9 +11,10 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class FreeListResponseDTO {
+public class FAQListResponseDTO {
 
     private int count;
     private PageResponseDTO pageInfo;
-    private List<FreeboardDetailResponseDTO> freeboards;
+    private List<FAQDetailResponseDTO> posts;
+
 }
