@@ -3,7 +3,6 @@ package com.example.demo.member.user.entity;
 import com.example.demo.consulting.entity.Consulting;
 import com.example.demo.freeboard.entity.Freeboard;
 import com.example.demo.reply.entity.Reply;
-import com.example.demo.token.entity.RefreshToken;
 import lombok.*;
 
 import javax.persistence.*;

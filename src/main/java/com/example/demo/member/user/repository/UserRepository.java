@@ -14,6 +14,4 @@ public interface UserRepository
 
     Optional<User> findByEmail(String email);
 
-    // db에 refreshToken이 존재하는가
-    boolean existsByRefreshToken(String refreshToken);
 }
