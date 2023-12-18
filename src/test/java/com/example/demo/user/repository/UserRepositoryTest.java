@@ -13,6 +13,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
@@ -90,8 +93,26 @@ class UserRepositoryTest {
         //then
         assertTrue(flag);
     }
+  
+    @Test
+    @DisplayName("array")
+    void array() {
+        //given
 
-    
+        //when
+        List<String> list1 = new ArrayList<>();
+        list1.add("안녕");
+        list1.add("클레오파트라");
+
+        List<String> list2 = new ArrayList<>();
+        list2.addAll(list1);
+
+        //then
+        System.out.println("\n\n\n");
+        System.out.println("list2 = " + list2);
+        System.out.println("\n\n\n");
+
+    }
 
     
 }

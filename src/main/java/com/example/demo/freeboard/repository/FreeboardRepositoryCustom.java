@@ -6,7 +6,7 @@ import java.util.List;
 
 public interface FreeboardRepositoryCustom {
 
-    List<Freeboard> findByContent(String content);
+    List<Freeboard> findByContent(String content, boolean flag);
 
 
 }

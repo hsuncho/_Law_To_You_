@@ -1,7 +1,11 @@
 package com.example.demo.reply.repository;
 
 import com.example.demo.freeboard.repository.FreeboardRepository;
+import com.example.demo.lawyer.entity.Lawyer;
+import com.example.demo.lawyer.repository.LawyerRepository;
 import com.example.demo.reply.entity.Reply;
+import com.example.demo.user.entity.User;
+import com.example.demo.user.repository.UserRepository;
 import org.hibernate.boot.TempTableDdlTransactionHandling;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -9,6 +13,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -23,14 +29,25 @@ class ReplyRepositoryTest {
     @Autowired
     FreeboardRepository freeboardRepository;
 
+    @Autowired
+    UserRepository userRepository;
+
+    @Autowired
+    LawyerRepository lawyerRepository;
+
     @Test
     @DisplayName("댓글 등록Test")
     void replyTest() {
         //given
+
+        User user = userRepository.findById("park1234").orElseThrow();
+        Lawyer lawyer = lawyerRepository.findById("lll1234").orElseThrow();
+
         Reply r1 = Reply.builder()
-                .rno(1)
-                .content("아 이거 그렇게 하는거 아닌데")
-                .writer("김춘식")
+                .content("아아아아아아아아아")
+                .writer("김똥꾸")
+                .user(user)
+                .lawyer(lawyer)
                 .build();
 
         //when
@@ -40,6 +57,34 @@ class ReplyRepositoryTest {
         assertNotNull(saved);
 
     }
+    
+    @Test
+    @DisplayName("댓글 삭제Test")
+    void replyDeleteTest() {
+        //given
+        int rno = 2;
+        //when
+        replyRepository.deleteById(rno);
+
+        //then
+    }
+
+    // 댓글 삭제(버튼 띄우기)
+
+
+    @Test
+    @DisplayName("댓글 목록")
+    void replyListTest() {
+        //given
+        List<Reply> replyList = replyRepository.findAll();
+        //when
+
+        replyList.forEach(System.out::println);
+        //then
+        assertEquals(3, replyList.size());
+
+    }
+    
 
 }
 
