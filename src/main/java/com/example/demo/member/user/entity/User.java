@@ -1,8 +1,7 @@
-package com.example.demo.user.entity;
+package com.example.demo.member.user.entity;
 
 import com.example.demo.consulting.entity.Consulting;
 import com.example.demo.freeboard.entity.Freeboard;
-import com.example.demo.freeboard.entity.FreeboardFile;
 import com.example.demo.reply.entity.Reply;
 import lombok.*;
 
@@ -59,6 +58,17 @@ public class User {
     @Builder.Default
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Reply> replyList = new ArrayList<>();
+
+    // refreshToken 수정 가능한 setter 메서드
+    public void setRefreshToken(String refreshToken) {
+        this.refreshToken = refreshToken;
+    }
+
+    public void setAccessToken(String token) {
+        this.accessToken = token;
+    }
+
+
 
 
 }

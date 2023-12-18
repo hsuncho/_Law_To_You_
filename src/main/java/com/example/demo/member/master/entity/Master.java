@@ -1,4 +1,4 @@
-package com.example.demo.master.entity;
+package com.example.demo.member.master.entity;
 
 
 import lombok.*;

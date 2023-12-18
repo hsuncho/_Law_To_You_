@@ -1,7 +1,8 @@
-package com.example.demo.lawyer.entity;
+package com.example.demo.member.lawyer.entity;
 
 import com.example.demo.answer.entity.Answer;
 import com.example.demo.freeboard.entity.Freeboard;
+import com.example.demo.member.Member;
 import com.example.demo.reply.entity.Reply;
 import lombok.*;
 
@@ -24,8 +25,9 @@ public class Lawyer {
     @Column(name = "lawyer_id")
     private String lawyerId;
 
+    @Builder.Default
     @Column(nullable = false)
-    private boolean approval;
+    private boolean approval = false;
 
     @Builder.Default
     private String authority = "lawyer";
@@ -49,6 +51,9 @@ public class Lawyer {
 
     private String refreshToken;
 
+    @Column(nullable = false)
+    private String attachedFile;
+
     // 자유게시판 (freeboard)
     @OneToMany(mappedBy = "lawyer", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
@@ -57,10 +62,13 @@ public class Lawyer {
     // 댓글 (reply)
     @OneToMany(mappedBy = "lawyer", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
-
     private List<Reply> replyList = new ArrayList<>();
 
     // 답변(answer)
     @OneToOne(mappedBy = "lawyer", cascade = CascadeType.ALL, orphanRemoval = true)
     private Answer answer;
+
+    public void setRefreshToken(String token) {
+        this.refreshToken = token;
+    }
 }

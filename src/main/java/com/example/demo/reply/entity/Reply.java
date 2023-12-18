@@ -1,8 +1,8 @@
 package com.example.demo.reply.entity;
 
 import com.example.demo.freeboard.entity.Freeboard;
-import com.example.demo.lawyer.entity.Lawyer;
-import com.example.demo.user.entity.User;
+import com.example.demo.member.lawyer.entity.Lawyer;
+import com.example.demo.member.user.entity.User;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 

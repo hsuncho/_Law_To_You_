@@ -1,5 +1,5 @@
 server:
-  port: 8182
+  port: 8183
 
 
 spring:
@@ -28,13 +28,13 @@ springdoc:
     path: /myapi.html
 
 jwt:
-  secret: LNwR2LUuRSwbBh9hVWWr1WK1zZj370QgGsSKGqJVYXEsZ1DeB6hsYUG7axUEhKwFxWH4lRPd/Aq+PFkss18bHQ==
+  secret: hHIep+GupDQAo1MbVPi9mYyD4dAZMlv9udV2mqgLAHz98fYxRVgRKxD/HKgKmbPTTSAaRRrLjAaFhFRmJ3kLKQ==
 
 kakao:
-  client_id: 1b623442a88895e68425890c7346073a
+  client_id: 155365e0d141c1c75426c902d8b85cc0
   redirect_url: http://localhost:3000/oauth/redirected/kakao
-  client_secret: pwbDJTXBmWzNhKl5PB7e2DZBW0Nmg5Ef
+  client_secret: LZATRysEYunK5eoGAu2KY8ddYJUjZAva
 
 # ??? ?? ?? ??
 upload:
-  path: C:/todo_upload
+  path: C:/lawyer_upload
