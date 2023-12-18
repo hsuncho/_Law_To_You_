@@ -1,7 +1,6 @@
-package com.example.demo.lawyer.repository;
+package com.example.demo.member.lawyer.repository;
 
-import com.example.demo.lawyer.entity.Lawyer;
-import com.example.demo.user.entity.User;
+import com.example.demo.member.lawyer.entity.Lawyer;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface LawyerRepository

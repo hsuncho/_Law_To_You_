@@ -1,7 +1,7 @@
 package com.example.demo.consulting.entity;
 
 import com.example.demo.answer.entity.Answer;
-import com.example.demo.user.entity.User;
+import com.example.demo.member.user.entity.User;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
