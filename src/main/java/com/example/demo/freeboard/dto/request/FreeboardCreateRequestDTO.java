@@ -2,12 +2,10 @@ package com.example.demo.freeboard.dto.request;
 
 
 import com.example.demo.freeboard.entity.Freeboard;
-import com.example.demo.user.entity.User;
+import com.example.demo.member.user.entity.User;
 import lombok.*;
 
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.Size;
-import java.time.LocalDateTime;
 
 @Setter
 @Getter

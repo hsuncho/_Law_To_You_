@@ -7,8 +7,8 @@ import com.example.demo.freeboard.dto.response.FreeboardDetailResponseDTO;
 import com.example.demo.freeboard.dto.response.PageResponseDTO;
 import com.example.demo.freeboard.entity.Freeboard;
 import com.example.demo.freeboard.repository.FreeboardRepository;
-import com.example.demo.user.entity.User;
-import com.example.demo.user.repository.UserRepository;
+import com.example.demo.member.user.entity.User;
+import com.example.demo.member.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
-
 
 @Service
 @Slf4j
