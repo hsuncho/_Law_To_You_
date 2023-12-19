@@ -13,7 +13,6 @@ import com.example.demo.member.user.repository.UserRepository;
 import com.example.demo.token.auth.TokenMemberInfo;
 import com.example.demo.token.auth.TokenProvider;
 import com.example.demo.token.dto.TokenDTO;
-import jdk.jshell.Snippet;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -22,13 +21,11 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.client.RestTemplate;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.Map;
-import java.util.Optional;
 
 
 @Service
@@ -139,9 +136,7 @@ public class UserService {
         response.addHeader("Refresh-Token", tokenDTO.getRefreshToken());
         log.info("Response에 헤더 추가됨 - {}", response.getHeader("Authorization"));
 
-
         /*
-
         Optional<RefreshToken> refreshToken = tokenRepository.findById(dto.getId());
 
         // 있다면 새 토큰 발급후 업데이트
@@ -152,12 +147,12 @@ public class UserService {
             RefreshToken newToken = new RefreshToken(tokenDTO.getRefreshToken(), dto.getId());
             tokenRepository.save(newToken);
         }
-
          */
 
         return new LoginResponseDTO(member, tokenDTO);
 
     }
+
 
     // 카카오 로그인
     public LoginResponseDTO kakaoService(String code) {
@@ -165,14 +160,19 @@ public class UserService {
         // 인가코드를 통해 토큰 발급받기
         Map<String, Object> responseData
                 = getKakaoAccessToken(code);
-        log.info("token: {}", responseData.get("access_token"));
+
+        String accessToken = (String) responseData.get("access_token");
+        String refreshToken = (String) responseData.get("refresh_token");
+
+        log.info("accessToken: {}", accessToken);
+        log.info("refreshToken: {}", refreshToken);
 
         // 토큰을 통해 사용자 정보 가져오기
-        KakaoUserDTO dto = getKakaoUserInfo((String) responseData.get("access_token"));
+        KakaoUserDTO dto = getKakaoUserInfo(accessToken);
 
         if(!isDuplicateEmail(dto.getKakaoAccount().getEmail())) {
             User saved
-                    = userRepository.save(dto.toEntity((String) responseData.get("access_token")));
+                    = userRepository.save(dto.toEntity(accessToken));
         }
         User foundUser = userRepository.findByEmail(dto.getKakaoAccount().getEmail()).orElseThrow();
 
@@ -186,7 +186,8 @@ public class UserService {
 
         TokenDTO tokenDTO = tokenProvider.createToken(member);// 토큰 발급
         
-        foundUser.setAccessToken((String) responseData.get("access_token"));
+        foundUser.setAccessToken(accessToken);
+        foundUser.setRefreshToken(refreshToken);
         userRepository.save(foundUser);
 
         return new LoginResponseDTO(member, tokenDTO);
@@ -249,6 +250,58 @@ public class UserService {
         return responseData;
     }
 
+    // 액세스 토큰이 만료되었다면 이 메서드 호출하기
+    public Map<String, Object> updateKakaoToken(String code) {
+
+        Map<String, Object> responseData = getKakaoAccessToken(code);
+        String refreshToken = (String) responseData.get("refresh_token");
+        String accessToken = (String) responseData.get("access_token");
+
+        String id = String.valueOf(getKakaoUserInfo(accessToken).getId());
+        User foundUser = userRepository.findById(id).orElseThrow();
+
+        // 요청 uri
+        String requestUri = "https://kauth.kakao.com/oauth/token";
+
+        // 요청 헤더 설정
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Content-type", "application/x-www-form-urlencoded;charset=utf-8");
+
+        // 요청 바디(파라미터) 설정
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        params.add("grant_type", "refresh_token");
+        params.add("client_id", KAKAO_CLIENT_ID);
+        params.add("refresh_token", refreshToken);
+        params.add("client_secret", KAKAO_CLIENT_SECRET); // 카카오 디벨로퍼 client secret(활성화 시 추가해 줘야 함)
+
+        // 헤더와 바디 정보를 합치기 위해 HttpEntity 객체 생성
+        HttpEntity<Object> requestEntity = new HttpEntity<>(params, headers);
+
+        // 카카오 서버로 POST 통신
+        RestTemplate template = new RestTemplate();
+
+        // 통신을 보내면서 응답데이터를 리턴
+        ResponseEntity<Map> responseEntity
+                = template.exchange(requestUri, HttpMethod.POST, requestEntity, Map.class);
+
+        // 응답 데이터에서 필요한 정보를 가져오기
+        Map<String, Object> response = (Map<String, Object>)responseEntity.getBody();
+        log.info("토큰 갱신 요청 응답 데이터: {}", response);
+
+        // 액세스 토큰 갱신 및 저장
+        String newAccessToken = (String) response.get("access_token");
+        foundUser.setAccessToken(newAccessToken);
+        Member member = Member.builder()
+                .id(id)
+                .authority(foundUser.getAuthority())
+                .user(foundUser)
+                .build();
+
+        memberRepository.save(member);
+
+        return response;
+    }
+
     public String logout(HttpServletRequest request, final TokenMemberInfo memberInfo) {
 
         String refreshToken = request.getHeader("Refresh-Token");
@@ -261,15 +314,13 @@ public class UserService {
         if(validation == null) {
             if(member.getAuthority().equals("user")) {
                 accessToken = member.getUser().getAccessToken();
-                member.getUser().setRefreshToken(null);
             } else if(member.getAuthority().equals("lawyer")) {
                 accessToken = member.getLawyer().getAccessToken();
-                member.getLawyer().setRefreshToken(null);
             }
         }
 
         // 카카오 로그아웃
-        if(member.getUser().getJoinMethod().equals("kakao")) {
+        if(member.getAuthority().equals("user") && member.getUser().getJoinMethod().equals("kakao")) {
             String reqUri = "https://kapi.kakao.com/v1/user/logout";
             HttpHeaders headers = new HttpHeaders();
             headers.add("Authorization", "Bearer " + accessToken);
@@ -281,36 +332,13 @@ public class UserService {
             return responseData.getBody();
         }
 
+        if(member.getAuthority().equals("user")) member.getUser().setRefreshToken("abc");
+        else if(member.getAuthority().equals("lawyer")) member.getLawyer().setRefreshToken(null);
+
         // 카카오 로그인을 한 사람이 아닐 경우
         return null;
 
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 }
