@@ -16,12 +16,14 @@ public class FreeboardUpdateRequestDTO {
 
 
     private int bno;
+    private String userId;
     private String title;
     private String content;
 
 
-    public FreeboardUpdateRequestDTO(int bno, String title, String content) {
+    public FreeboardUpdateRequestDTO(int bno,String userId, String title, String content) {
         this.bno = bno;
+        this.userId = userId;
         this.title = title;
         this.content = content;
     }
