@@ -1,14 +1,18 @@
 package com.example.demo.freeboard.service;
 
+import com.example.demo.freeboard.dto.FreeboardCreateDTO;
 import com.example.demo.freeboard.dto.PageDTO;
+import com.example.demo.freeboard.dto.request.FreeboardCreateRequestDTO;
 import com.example.demo.freeboard.dto.request.FreeboardUpdateRequestDTO;
 import com.example.demo.freeboard.dto.response.FreeListResponseDTO;
 import com.example.demo.freeboard.dto.response.FreeboardDetailResponseDTO;
 import com.example.demo.freeboard.dto.response.PageResponseDTO;
 import com.example.demo.freeboard.entity.Freeboard;
+import com.example.demo.freeboard.entity.FreeboardFile;
 import com.example.demo.freeboard.repository.FreeboardRepository;
-import com.example.demo.user.entity.User;
-import com.example.demo.user.repository.UserRepository;
+import com.example.demo.member.user.entity.User;
+import com.example.demo.member.user.repository.UserRepository;
+import com.example.demo.token.auth.TokenMemberInfo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -34,7 +38,6 @@ public class FreeboardService {
     private final FreeboardRepository freeboardRepository;
     private final UserRepository userRepository;
 
-
     public FreeListResponseDTO getFreeBoards(PageDTO dto) {
         Pageable pageable = PageRequest.of(
                 dto.getPage() - 1,
@@ -59,18 +62,33 @@ public class FreeboardService {
                 .build();
     }
 
-//    public Freeboard create(
-//            final FreeboardCreateRequestDTO requestDTO
-////             final TokenUserInfo userInfo
-//    ) throws RuntimeException {
-//
-//        // 토큰에서 아이디값을 가져와야함
-////        User user = getUser();
-//
-//        log.info("게시글 작성 완료! 제목: {}", requestDTO.getTitle());
-//
-////        return freeboardRepository.save(requestDTO.toEntity(user));
-//    }
+    public FreeListResponseDTO retrieve(String userId) {
+        User user = getUser(userId);
+
+        List<Freeboard> entityList = freeboardRepository.findAllByUser(user);
+
+        List<FreeboardDetailResponseDTO> dtoList = entityList.stream()
+                .map(FreeboardDetailResponseDTO::new)
+                .collect(Collectors.toList());
+
+        return FreeListResponseDTO.builder()
+                .freeboards(dtoList)
+                .build();
+    }
+
+    public FreeListResponseDTO create(
+            final FreeboardCreateDTO requestDTO,
+             final TokenMemberInfo userInfo
+    ) throws RuntimeException {
+
+        // 토큰에서 아이디값을 가져와야함
+        User user = getUser(userInfo.getId());
+        Freeboard freeboard = freeboardRepository.save(requestDTO.getRequestDTO().toEntity(user));
+
+        log.info("게시글 작성 완료! 제목: {}", requestDTO.getRequestDTO().getTitle());
+        freeboardRepository.save(freeboard);
+        return retrieve(userInfo.getId());
+    }
 
     private User getUser(String userId) {
         User user = userRepository.findById(userId).orElseThrow(
@@ -79,17 +97,21 @@ public class FreeboardService {
         return user;
     }
 
-    public FreeboardDetailResponseDTO modify(FreeboardUpdateRequestDTO dto) {
-        
-        Freeboard freeboardEntity = getFreeBoard(dto.getBno());
+    public FreeListResponseDTO modify(FreeboardUpdateRequestDTO dto, String userId) {
 
-        freeboardEntity.setTitle("(수정됨) " + dto.getTitle());
-        freeboardEntity.setContent(dto.getContent());
-        freeboardEntity.setRegDate(LocalDateTime.now());
+        Optional<Freeboard> byId = freeboardRepository.findById(dto.getBno());
 
-        Freeboard modifiedFreeboard = freeboardRepository.save(freeboardEntity);
 
-        return new FreeboardDetailResponseDTO(modifiedFreeboard);
+        byId.ifPresent(freeboard -> {
+            freeboard.setTitle("(수정됨) " + dto.getTitle());
+            freeboard.setContent(dto.getContent());
+            freeboard.setRegDate(LocalDateTime.now());
+
+            freeboardRepository.save(freeboard);
+        });
+
+
+        return retrieve(userId);
         
     }
 

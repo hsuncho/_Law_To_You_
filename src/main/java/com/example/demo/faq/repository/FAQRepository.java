@@ -9,5 +9,4 @@ import java.util.Optional;
 public interface FAQRepository extends JpaRepository<FAQ, Integer>,
         FAQRepositoryCustom {
 
-
 }

@@ -4,7 +4,6 @@ import com.example.demo.faq.dto.*;
 import com.example.demo.faq.entity.FAQ;
 import com.example.demo.faq.service.FAQService;
 import com.example.demo.freeboard.dto.PageDTO;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
