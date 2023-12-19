@@ -6,13 +6,12 @@ import com.example.demo.faq.dto.PageResponseDTO;
 import com.example.demo.faq.entity.FAQ;
 import com.example.demo.faq.repository.FAQRepository;
 import com.example.demo.freeboard.dto.PageDTO;
-import com.querydsl.core.Tuple;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
