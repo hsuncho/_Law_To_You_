@@ -1,6 +1,25 @@
 package com.example.demo.consulting.api;
 
-import com.example.demo.aws.S3Service;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+
 import com.example.demo.consulting.dto.request.ConsultingRegisterRequestDTO;
 import com.example.demo.consulting.dto.request.DetailedConsultingRegisterRequestDTO;
 import com.example.demo.consulting.dto.response.ConsultingDetailResponseDTO;
@@ -9,22 +28,11 @@ import com.example.demo.consulting.dto.response.UpdatedConsultingDetailResponseD
 import com.example.demo.consulting.entity.Consulting;
 import com.example.demo.consulting.service.ConsultingService;
 import com.example.demo.freeboard.dto.PageDTO;
+import com.example.demo.freeboard.service.S3Service;
 import com.example.demo.token.auth.TokenMemberInfo;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.validation.BindingResult;
-import org.springframework.validation.FieldError;
-import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 @RestController
 @Slf4j

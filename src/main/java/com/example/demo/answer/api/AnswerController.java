@@ -1,21 +1,27 @@
 package com.example.demo.answer.api;
 
-import com.example.demo.answer.dto.request.AnswerRegisterRequestDTO;
-import com.example.demo.answer.dto.response.AnswerDetailResponseDTO;
-import com.example.demo.answer.dto.response.AnswerListResponseDTO;
-import com.example.demo.answer.service.AnswerService;
-import com.example.demo.aws.S3Service;
-import com.example.demo.consulting.dto.request.ConsultingRegisterRequestDTO;
-import com.example.demo.freeboard.dto.PageDTO;
-import com.example.demo.token.auth.TokenMemberInfo;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.example.demo.answer.dto.request.AnswerRegisterRequestDTO;
+import com.example.demo.answer.dto.response.AnswerDetailResponseDTO;
+import com.example.demo.answer.dto.response.AnswerListResponseDTO;
+import com.example.demo.answer.service.AnswerService;
+import com.example.demo.freeboard.dto.PageDTO;
+import com.example.demo.freeboard.service.S3Service;
+import com.example.demo.token.auth.TokenMemberInfo;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 
 @RestController
@@ -74,7 +80,7 @@ public class AnswerController {
 
        return ResponseEntity.ok().body(responseDTO);
     }
-    
+
      */
 
 

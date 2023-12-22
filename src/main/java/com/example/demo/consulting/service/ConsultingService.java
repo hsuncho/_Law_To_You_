@@ -1,22 +1,14 @@
 package com.example.demo.consulting.service;
 
-import com.example.demo.aws.S3Service;
-import com.example.demo.consulting.dto.request.ConsultingRegisterRequestDTO;
-import com.example.demo.consulting.dto.request.DetailedConsultingRegisterRequestDTO;
-import com.example.demo.consulting.dto.response.*;
-import com.example.demo.consulting.entity.Consulting;
-import com.example.demo.consulting.entity.ConsultingFile;
-import com.example.demo.consulting.entity.DetailedConsultingFile;
-import com.example.demo.consulting.repository.ConsultingFileRepository;
-import com.example.demo.consulting.repository.ConsultingRepository;
-import com.example.demo.consulting.repository.DetailedConsultingFileRepository;
-import com.example.demo.freeboard.dto.PageDTO;
-import com.example.demo.freeboard.dto.response.PageResponseDTO;
-import com.example.demo.member.user.entity.User;
-import com.example.demo.member.user.repository.UserRepository;
-import com.example.demo.token.auth.TokenMemberInfo;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+import javax.persistence.EntityManager;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -25,17 +17,32 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+
+import com.example.demo.consulting.dto.request.ConsultingRegisterRequestDTO;
+import com.example.demo.consulting.dto.request.DetailedConsultingRegisterRequestDTO;
+import com.example.demo.consulting.dto.response.ConsultingDetailResponseDTO;
+import com.example.demo.consulting.dto.response.ConsultingFileDTO;
+import com.example.demo.consulting.dto.response.ConsultingListResponseDTO;
+import com.example.demo.consulting.dto.response.DetailedConsultingFileDTO;
+import com.example.demo.consulting.dto.response.UpdatedConsultingDetailResponseDTO;
+import com.example.demo.consulting.entity.Consulting;
+import com.example.demo.consulting.entity.ConsultingFile;
+import com.example.demo.consulting.entity.DetailedConsultingFile;
+import com.example.demo.consulting.repository.ConsultingFileRepository;
+import com.example.demo.consulting.repository.ConsultingRepository;
+import com.example.demo.consulting.repository.DetailedConsultingFileRepository;
+import com.example.demo.freeboard.dto.PageDTO;
+import com.example.demo.freeboard.dto.response.PageResponseDTO;
+import com.example.demo.freeboard.service.S3Service;
+import com.example.demo.member.user.entity.User;
+import com.example.demo.member.user.repository.UserRepository;
+import com.example.demo.token.auth.TokenMemberInfo;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
-
-import javax.persistence.EntityManager;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.stream.Collectors;
 
 
 @Service

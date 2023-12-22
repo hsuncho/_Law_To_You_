@@ -1,7 +1,5 @@
 package com.example.demo.token.config;
 
-import com.example.demo.token.filter.JwtMemberFilter;
-import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -11,6 +9,10 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.filter.CorsFilter;
+
+import com.example.demo.token.filter.JwtMemberFilter;
+
+import lombok.RequiredArgsConstructor;
 
 //@Configuration
 @EnableWebSecurity
@@ -41,6 +43,8 @@ public class WebSecurityConfig {
                 .authorizeRequests()
                 .antMatchers("/api/user/logout").authenticated()
                 .antMatchers("/", "/api/user/**", "/api/lawyer/**","/api/counsel/content/**", "/api/answer").permitAll()
+//                .antMatchers("/api/user/logout").authenticated()
+                .antMatchers("/api/faq/**", "/", "/api/user/**", "/api/lawyer/**").permitAll()
                 .anyRequest().authenticated();
 
         // 토큰 인증 필터 연결

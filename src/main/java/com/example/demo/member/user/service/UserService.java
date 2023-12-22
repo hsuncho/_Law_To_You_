@@ -1,6 +1,21 @@
 package com.example.demo.member.user.service;
 
-import com.example.demo.freeboard.dto.PageDTO;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestTemplate;
+
 import com.example.demo.member.Member;
 import com.example.demo.member.MemberRepository;
 import com.example.demo.member.lawyer.repository.LawyerRepository;
@@ -14,19 +29,9 @@ import com.example.demo.member.user.repository.UserRepository;
 import com.example.demo.token.auth.TokenMemberInfo;
 import com.example.demo.token.auth.TokenProvider;
 import com.example.demo.token.dto.TokenDTO;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.*;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
-import org.springframework.web.client.RestTemplate;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.util.Map;
 
 
 @Service
@@ -46,6 +51,7 @@ public class UserService {
     private String KAKAO_REDIRECT_URI;
     @Value("${kakao.client_secret}")
     private String KAKAO_CLIENT_SECRET;
+
 
 
     public boolean isDuplicateId(String id) {

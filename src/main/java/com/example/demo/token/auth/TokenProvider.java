@@ -1,26 +1,28 @@
 package com.example.demo.token.auth;
 
-import com.example.demo.member.Member;
-import com.example.demo.member.MemberRepository;
-import com.example.demo.member.lawyer.repository.LawyerRepository;
-import com.example.demo.member.user.repository.UserRepository;
-import com.example.demo.token.dto.TokenDTO;
-import io.jsonwebtoken.*;
-import io.jsonwebtoken.security.Keys;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.stereotype.Component;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
+import com.example.demo.member.Member;
+import com.example.demo.member.lawyer.repository.LawyerRepository;
+import com.example.demo.member.user.repository.UserRepository;
+import com.example.demo.token.dto.TokenDTO;
+
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.Jws;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.UnsupportedJwtException;
+import io.jsonwebtoken.security.Keys;
+import lombok.extern.slf4j.Slf4j;
 
 @Component
 @Slf4j

@@ -1,26 +1,30 @@
-package com.example.demo.aws;
+package com.example.demo.freeboard.service;
 
-import lombok.extern.slf4j.Slf4j;
+
+import javax.annotation.PostConstruct;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+
+import lombok.extern.slf4j.Slf4j;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
+import software.amazon.awssdk.services.s3.model.GetObjectRequest;
+import software.amazon.awssdk.services.s3.model.GetObjectResponse;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
-
-import javax.annotation.PostConstruct;
-import java.security.Security;
+import software.amazon.awssdk.services.s3.model.S3Exception;
 
 @Service
 @Slf4j
 public class S3Service {
 
-    // s3 버킷을 제어하는 객체
     private S3Client s3;
 
-    @Value("${aws.credentials.accessKey}") // value: spring꺼 임포트
+    @Value("${aws.credentials.accessKey}")
     private String accessKey;
 
     @Value("${aws.credentials.secretKey}")
@@ -32,10 +36,8 @@ public class S3Service {
     @Value("${aws.bucketName}")
     private String bucketName;
 
-    // s3에 연결해서 인증을 처리하는 로직
-    @PostConstruct // S3Service가 생성될 때 1번만 실행되는 아노테이션
+    @PostConstruct
     private void initializeAmazon() {
-        // 액세스 키와 시크릿 키를 이용해서 계정 인증 받기
         AwsBasicCredentials credentials = AwsBasicCredentials.create(accessKey, secretKey);
 
         this.s3 = S3Client.builder()
@@ -57,21 +59,48 @@ public class S3Service {
                 .bucket(bucketName) // 버킷 이름
                 .key(fileName) // 파일명
                 .build();
+
         // 오브젝트를 버킷에 업로드(위에서 생성한 오브젝트, 업로드 하고자 하는 파일(바이트 배열)
         s3.putObject(request, RequestBody.fromBytes(uploadFile));
 
-        // 업로드 된 파일의 url을 반환
-        return s3.utilities()
-                .getUrl(b -> b.bucket(bucketName).key(fileName))
-                .toString();
+
+        return uploadFileName(fileName);
 
 
     }
 
+    // 업로드 된 파일의 url을 반환
+    public String uploadFileName(String fileName) {
+        return   s3.utilities()
+                .getUrl(b -> b.bucket(bucketName).key(fileName))
+                .toString();
+    }
+
+    // 업로드 된 파일 수정
+
+    public void deleteS3Object(String fileName) {
+        try{
+
+            GetObjectResponse originalImage = s3.getObject(GetObjectRequest.builder()
+                            .bucket(bucketName)
+                            .key(uploadFileName(fileName))
+                            .build()).response();
+
+//            byte[] imageBytes = new byte[(long) originalImage.contentLength()];
 
 
+        DeleteObjectRequest deleteObjectRequest = DeleteObjectRequest.builder()
+                .bucket(bucketName)
+                .key(uploadFileName(fileName))
+                .build();
 
 
+            log.info("File delete Success!!");
+            s3.deleteObject(deleteObjectRequest);
+        } catch (S3Exception e) {
+            log.info(e.getMessage());
+        }
+    }
 
 
 }
