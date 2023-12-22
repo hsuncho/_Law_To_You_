@@ -13,6 +13,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 import java.util.List;
 import java.util.Optional;
@@ -98,7 +99,7 @@ class FreeboardRepositoryTest {
         //given
         String content = "춘식이";
         //when
-        List<Freeboard> result = freeboardRepository.findByContent(content);
+        List<Freeboard> result = freeboardRepository.findByContent(content, true);
         //then
         System.out.println(result);
         assertEquals(2, result.size());

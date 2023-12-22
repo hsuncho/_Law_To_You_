@@ -41,7 +41,7 @@ public class TokenProvider {
     // access token 만료 기한
     private final Date expiry = Date.from(
 //            Instant.now().plus(6, ChronoUnit.HOURS)
-            Instant.now().plus(2, ChronoUnit.SECONDS)
+            Instant.now().plus(2, ChronoUnit.MINUTES)
     );
 
     // refresh token 만료 기한

@@ -16,7 +16,10 @@ import com.example.demo.token.dto.TokenDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.*;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
@@ -45,6 +48,7 @@ public class UserService {
     private String KAKAO_REDIRECT_URI;
     @Value("${kakao.client_secret}")
     private String KAKAO_CLIENT_SECRET;
+
 
 
     public boolean isDuplicateId(String id) {
@@ -339,6 +343,8 @@ public class UserService {
         return null;
 
     }
+
+
 
 
 }

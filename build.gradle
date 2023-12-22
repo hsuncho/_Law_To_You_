@@ -66,8 +66,10 @@ dependencies {
 	annotationProcessor "com.querydsl:querydsl-apt:${queryDslVersion}"
 
 	// S3 라이브러리 아마존 서비스에 접근해서 사용하는
-	implementation 'software.amazon.awssdk:s3:2.17.52'
+//	implementation 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE'
 
+	// S3 라이브러리 아마존 서비스에 접근해서 사용하는
+	implementation 'software.amazon.awssdk:s3:2.17.52'
 
 }
 

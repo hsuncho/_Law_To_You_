@@ -18,7 +18,6 @@ public class FreeboardFile {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int fileNum;
 
-    @Column(nullable = false)
     private String route;
 
     @ManyToOne(fetch = FetchType.LAZY)
