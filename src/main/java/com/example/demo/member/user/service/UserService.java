@@ -1,5 +1,21 @@
 package com.example.demo.member.user.service;
 
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestTemplate;
+
 import com.example.demo.member.Member;
 import com.example.demo.member.MemberRepository;
 import com.example.demo.member.lawyer.repository.LawyerRepository;
@@ -13,22 +29,9 @@ import com.example.demo.member.user.repository.UserRepository;
 import com.example.demo.token.auth.TokenMemberInfo;
 import com.example.demo.token.auth.TokenProvider;
 import com.example.demo.token.dto.TokenDTO;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
-import org.springframework.web.client.RestTemplate;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.util.Map;
 
 
 @Service
@@ -118,43 +121,20 @@ public class UserService {
         TokenDTO tokenDTO = tokenProvider.createToken(member);
         log.info("\n\n\n토큰 DTO가 생성됨 - {}\n\n\n", tokenDTO);
 
-        // refresh token 있는지 확인
-        String refreshToken = null;
         if(member.getAuthority().equals("user")) {
-            refreshToken = userRepository.findById(member.getId()).orElseThrow().getRefreshToken();
-            // 있다면 새 토큰 발급 후 업데이트, 없다면 새로 만들고 저장
             member.getUser().setRefreshToken(tokenDTO.getRefreshToken());
-
         } else if(member.getAuthority().equals("lawyer")) {
-            refreshToken = lawyerRepository.findById(member.getId()).orElseThrow().getRefreshToken();
             member.getLawyer().setRefreshToken(tokenDTO.getRefreshToken());
-
         }
-        log.info("\n\n\nrefreshToken : {}\n\n\n", refreshToken);
-
 
         memberRepository.save(member);
 
         // Response 헤더에 필요한 토큰 정보 추가하여 반환
         response.addHeader("Authorization", "Bearer" + tokenDTO.getAccessToken());
         response.addHeader("Refresh-Token", tokenDTO.getRefreshToken());
-        log.info("Response에 헤더 추가됨 - {}", response.getHeader("Authorization"));
-
-        /*
-        Optional<RefreshToken> refreshToken = tokenRepository.findById(dto.getId());
-
-        // 있다면 새 토큰 발급후 업데이트
-        // 없다면 새로 만들고 디비 저장
-        if(refreshToken.isPresent()) {
-            tokenRepository.save(refreshToken.get().updateToken(tokenDTO.getRefreshToken()));
-        }else {
-            RefreshToken newToken = new RefreshToken(tokenDTO.getRefreshToken(), dto.getId());
-            tokenRepository.save(newToken);
-        }
-         */
+        log.info("\n\n\nResponse에 헤더 추가됨 - {}\n\n\n", response.getHeader("Authorization"));
 
         return new LoginResponseDTO(member, tokenDTO);
-
     }
 
 
@@ -308,20 +288,19 @@ public class UserService {
 
     public String logout(HttpServletRequest request, final TokenMemberInfo memberInfo) {
 
-        String refreshToken = request.getHeader("Refresh-Token");
         String accessToken = request.getHeader("Authorization");
 
-        String validation = tokenProvider.validateRefreshToken(refreshToken);
+        log.info("\n\n\naccessToken - {}", accessToken);
 
         Member member = memberRepository.findById((memberInfo.getId())).orElseThrow();
 
-        if(validation == null) {
             if(member.getAuthority().equals("user")) {
                 accessToken = member.getUser().getAccessToken();
+                member.getUser().setRefreshToken(null);
             } else if(member.getAuthority().equals("lawyer")) {
                 accessToken = member.getLawyer().getAccessToken();
+                member.getLawyer().setRefreshToken(null);
             }
-        }
 
         // 카카오 로그아웃
         if(member.getAuthority().equals("user") && member.getUser().getJoinMethod().equals("kakao")) {
@@ -336,15 +315,11 @@ public class UserService {
             return responseData.getBody();
         }
 
-        if(member.getAuthority().equals("user")) member.getUser().setRefreshToken("abc");
-        else if(member.getAuthority().equals("lawyer")) member.getLawyer().setRefreshToken(null);
+        memberRepository.save(member);
 
         // 카카오 로그인을 한 사람이 아닐 경우
         return null;
 
     }
-
-
-
 
 }
