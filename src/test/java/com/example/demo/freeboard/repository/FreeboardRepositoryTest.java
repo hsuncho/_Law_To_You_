@@ -1,11 +1,10 @@
 package com.example.demo.freeboard.repository;
 
 import com.example.demo.freeboard.entity.Freeboard;
-import com.example.demo.freeboard.repository.FreeboardRepository;
-import com.example.demo.lawyer.entity.Lawyer;
-import com.example.demo.lawyer.repository.LawyerRepository;
-import com.example.demo.user.entity.User;
-import com.example.demo.user.repository.UserRepository;
+import com.example.demo.member.lawyer.entity.Lawyer;
+import com.example.demo.member.lawyer.repository.LawyerRepository;
+import com.example.demo.member.user.entity.User;
+import com.example.demo.member.user.repository.UserRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,8 +12,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.validation.constraints.Pattern;
-import javax.validation.constraints.Size;
 import java.util.List;
 import java.util.Optional;
 
