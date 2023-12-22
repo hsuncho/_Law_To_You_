@@ -24,7 +24,7 @@ public class PageResponseDTO {
 
     private static final int PAGE_COUNT = 10;
 
-    public PageResponseDTO(Page<Freeboard> pageDate) {
+    public <T> PageResponseDTO(Page<T> pageDate) {
 
         this.totalCount = (int) pageDate.getTotalElements();
         this.currentPage = pageDate.getPageable().getPageNumber() + 1;

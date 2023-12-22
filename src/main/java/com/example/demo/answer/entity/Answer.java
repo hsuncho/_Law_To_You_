@@ -26,7 +26,8 @@ public class Answer {
     private int answerNum;
 
     @Column(nullable = false)
-    private int adopt;
+    @Builder.Default
+    private int adopt = 0;
 
     @Column(nullable = false)
     private String shortAns;

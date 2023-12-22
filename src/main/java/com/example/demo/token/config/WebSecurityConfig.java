@@ -39,8 +39,8 @@ public class WebSecurityConfig {
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .authorizeRequests()
-//                .antMatchers("/api/user/logout").authenticated()
-                .antMatchers("/", "/api/user/**", "/api/lawyer/**").permitAll()
+                .antMatchers("/api/user/logout").authenticated()
+                .antMatchers("/", "/api/user/**", "/api/lawyer/**","/api/counsel/content/**", "/api/answer").permitAll()
                 .anyRequest().authenticated();
 
         // 토큰 인증 필터 연결
