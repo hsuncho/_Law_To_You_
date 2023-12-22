@@ -6,7 +6,6 @@ import lombok.*;
 @Setter
 @ToString
 @EqualsAndHashCode
-@AllArgsConstructor
 @Builder
 public class PageDTO {
 
@@ -14,9 +13,9 @@ public class PageDTO {
     private int page;
     private int size;
 
-    public PageDTO() {
-        this.page = 1;
-        this.size = 15;
+    public PageDTO(int page, int size) {
+        this.page = page;
+        this.size = size;
     }
 
 }

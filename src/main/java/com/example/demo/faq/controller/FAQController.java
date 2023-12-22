@@ -7,6 +7,7 @@ import com.example.demo.freeboard.dto.PageDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -23,29 +24,35 @@ public class FAQController {
 
     // 백문백답 전체 요청
     @GetMapping
-    public ResponseEntity<?> FAQList(PageDTO pageDTO) {
-        log.info("/api/faq?page={}&size={}", pageDTO.getPage(), pageDTO.getSize());
+    public ResponseEntity<?> FAQList(@RequestParam(defaultValue = "1") int page,
+                                     @RequestParam(defaultValue = "10") int size) {
+        log.info("/api/faq?page={}&size={}", page, size);
 
+        PageDTO pageDTO = new PageDTO(page, size);
         FAQListResponseDTO dto = faqService.getFAQs(pageDTO);
 
         return ResponseEntity.ok().body(dto);
 
     }
 
-    // 백문백답 대분류 클릭시 중분류 리스트 값, 대분류 기준 전체 리스트(번호, 중분류, subject) 출력
+    // 백문백답 대분류 클릭시 중분류 리스트 값, 대분류 기준 전체 리스트(번호, 중분류, subject, question, answer) 출력
     @GetMapping("/{largeSection}")
-    public ResponseEntity<?> FAQLargeSection(@PathVariable String largeSection) {
+    public ResponseEntity<?> FAQLargeSection(@PathVariable String largeSection,
+                                             @RequestParam(defaultValue = "1") int page,
+                                             @RequestParam(defaultValue = "10") int size) {
         log.info("/api/faq/{} GET", largeSection);
 
         try {
+            PageDTO pageDTO = new PageDTO(page, size);
             List<String> middleList = faqService.getDetail(largeSection); // 중분류 리스트
 
             // 대분류 기준 리스트 List<FAQ>
-            List<FAQ> list = faqService.getLargeSecANDMiddleList(largeSection);
+            List<FAQ> list = faqService.getLargeSecANDMiddleList(largeSection, pageDTO);
             List<FAQMiddleAndQMSDTO> response = new ArrayList<>();
             int rowNum = 1;
             for(FAQ faq : list) {
-                response.add(new FAQMiddleAndQMSDTO(rowNum, faq.getQno(), faq.getMiddleSection(), faq.getSubject()));
+                response.add(new FAQMiddleAndQMSDTO(rowNum, faq.getQno(), faq.getMiddleSection(),
+                                                    faq.getSubject(), faq.getQuestion(), faq.getAnswer()));
                 rowNum++;
             }
 
@@ -59,17 +66,24 @@ public class FAQController {
         }
     }
 
-    // 백문백답 중분류 클릭시 중분류 기준 전체 리스트(번호, 중분류, subject) 출력
+    // 백문백답 중분류 클릭시 중분류 기준 전체 리스트(번호, 중분류, subject, question, answer) 출력
     @GetMapping("/{largeSection}/{middleSection}")
-    public ResponseEntity<?> FAQMiddleSection(@PathVariable String largeSection, @PathVariable String middleSection) {
+    public ResponseEntity<?> FAQMiddleSection(@PathVariable String largeSection,
+                                              @PathVariable String middleSection,
+                                              @RequestParam(defaultValue = "1") int page,
+                                              @RequestParam(defaultValue = "10") int size
+    ) {
         log.info("/api/faq/{}/{} GET!", largeSection, middleSection);
 
         try {
-            List<FAQ> qnaList = faqService.getMiddleANDList(largeSection, middleSection);
+            PageDTO pageDTO = new PageDTO(page, size);
+
+            List<FAQ> qnaList = faqService.getMiddleANDList(largeSection, middleSection, pageDTO);
             List<FAQMiddleSecAndSubjectDTO> qna = new ArrayList<>();
             int rowNum = 1;
             for(FAQ faq : qnaList) {
-                qna.add(new FAQMiddleSecAndSubjectDTO(rowNum, faq.getMiddleSection(), faq.getSubject()));
+                qna.add(new FAQMiddleSecAndSubjectDTO(rowNum, faq.getMiddleSection(), faq.getSubject()
+                                                        , faq.getQuestion(), faq.getAnswer()));
                 rowNum++;
             }
 
@@ -81,24 +95,24 @@ public class FAQController {
 
     }
 
-    // 특정 백문백답 클릭시 질문, 답변 출력
-    @GetMapping("/{largeSection}/{middleSection}/{qno}")
-    public ResponseEntity<?> FAQMiddleSectionQna(@PathVariable String largeSection, @PathVariable String middleSection,
-                                                 @PathVariable int qno) {
-        log.info("/api/faq/{}/{}/{} GET!", largeSection, middleSection, qno);
-
-        try{
-            List<FAQ> qnaList = faqService.getMiddleANDQna(largeSection, middleSection, qno);
-            List<QuestionAnswerDTO> qna = new ArrayList<>();
-            for (FAQ f : qnaList) {
-                qna.add(new QuestionAnswerDTO(f.getQuestion(), f.getAnswer()));
-            }
-            return ResponseEntity.ok().body(qna);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
-    }
+//    // 특정 백문백답 클릭시 질문, 답변 출력
+//    @GetMapping("/{largeSection}/{middleSection}/{qno}")
+//    public ResponseEntity<?> FAQMiddleSectionQna(@PathVariable String largeSection, @PathVariable String middleSection,
+//                                                 @PathVariable int qno) {
+//        log.info("/api/faq/{}/{}/{} GET!", largeSection, middleSection, qno);
+//
+//        try{
+//            List<FAQ> qnaList = faqService.getMiddleANDQna(largeSection, middleSection, qno);
+//            List<QuestionAnswerDTO> qna = new ArrayList<>();
+//            for (FAQ f : qnaList) {
+//                qna.add(new QuestionAnswerDTO(f.getQuestion(), f.getAnswer()));
+//            }
+//            return ResponseEntity.ok().body(qna);
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            return ResponseEntity.badRequest().body(e.getMessage());
+//        }
+//    }
 
 
 }

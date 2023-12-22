@@ -28,7 +28,6 @@ public class FreeboardCreateRequestDTO {
     @NotBlank
     private String title;
 
-    private List<FreeboardFile> route;
 
 
     public Freeboard toEntity(User user) {
@@ -36,7 +35,6 @@ public class FreeboardCreateRequestDTO {
                 .writer(user.getNickname())
                 .content(this.content)
                 .title(this.title)
-                .freeboardFiles(this.route)
                 .user(user)
                 .build();
     }

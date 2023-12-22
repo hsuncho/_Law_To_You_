@@ -1,17 +1,16 @@
 package com.example.demo.freeboard.dto.request;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
+import com.example.demo.freeboard.entity.Freeboard;
+import com.example.demo.freeboard.entity.FreeboardFile;
 import lombok.*;
 
-import javax.validation.constraints.NotBlank;
-import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Setter
 @Getter
 @ToString
 @EqualsAndHashCode
-@NoArgsConstructor
-@Builder
 public class FreeboardUpdateRequestDTO {
 
 
@@ -19,12 +18,17 @@ public class FreeboardUpdateRequestDTO {
     private String userId;
     private String title;
     private String content;
+    private List<String> routes;
 
 
-    public FreeboardUpdateRequestDTO(int bno,String userId, String title, String content) {
-        this.bno = bno;
-        this.userId = userId;
-        this.title = title;
-        this.content = content;
+
+    public FreeboardUpdateRequestDTO(Freeboard freeboard) {
+        this.bno = freeboard.getBno();
+        this.userId = freeboard.getUser().getId();
+        this.title = freeboard.getTitle();
+        this.content = freeboard.getContent();
+        this.routes = freeboard.getFreeboardFiles().stream()
+                .map(FreeboardFile::getRoute)
+                .collect(Collectors.toList());
     }
 }

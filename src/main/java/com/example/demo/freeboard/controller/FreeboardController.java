@@ -1,20 +1,19 @@
 package com.example.demo.freeboard.controller;
 
-import com.example.demo.freeboard.dto.FreeboardCreateDTO;
 import com.example.demo.freeboard.dto.PageDTO;
 import com.example.demo.freeboard.dto.request.FreeboardCreateRequestDTO;
 import com.example.demo.freeboard.dto.request.FreeboardUpdateRequestDTO;
 import com.example.demo.freeboard.dto.response.FreeListResponseDTO;
+import com.example.demo.freeboard.dto.response.FreeboardCreateResponseDTO;
 import com.example.demo.freeboard.dto.response.FreeboardDetailResponseDTO;
 import com.example.demo.freeboard.entity.Freeboard;
+import com.example.demo.freeboard.entity.FreeboardFile;
+import com.example.demo.freeboard.repository.FreeboardFileRepository;
 import com.example.demo.freeboard.service.FreeboardService;
+import com.example.demo.freeboard.service.S3Service;
 import com.example.demo.token.auth.TokenMemberInfo;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -24,9 +23,10 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 @RestController
 @Slf4j
@@ -36,10 +36,7 @@ import java.util.*;
 public class FreeboardController {
 
     private final FreeboardService freeboardService;
-
-    @Value("${upload.path}")
-    private String uploadPath;
-
+    private final S3Service s3Service;
 
     // 자유게시판 클릭시 글번호, 제목, 작성자, 작성일자, 리스트 요청
     @GetMapping
@@ -54,9 +51,9 @@ public class FreeboardController {
     // 게시글 등록 요청
     @PostMapping("/register")
     public ResponseEntity<?> writeFreeboard(
-            @Validated @RequestBody FreeboardCreateDTO requestDTO,
+            @Validated @RequestPart FreeboardCreateRequestDTO requestDTO,
             @AuthenticationPrincipal TokenMemberInfo userInfo,
-            MultipartFile[] multipartFiles,
+            @RequestPart(value = "attchedFile", required = false) List<MultipartFile> multipartFiles,
             BindingResult result
     ) {
 
@@ -68,51 +65,30 @@ public class FreeboardController {
         }
 
         try {
-
-            FreeboardCreateRequestDTO fileCreate = new ObjectMapper().readValue(requestDTO.getRoute(), FreeboardCreateRequestDTO.class);
-            log.info("fileCreate: {}", fileCreate);
-
-            for(int j=0; j < multipartFiles.length; j++) {
-                    MultipartFile file = multipartFiles[j];
-
-                    String fileId = (new Date().getTime()) + "" + (new Random().ints(1000, 9999).findAny().getAsInt());
-                    String originName = file.getOriginalFilename();
-                    String fileExtension = originName.substring(originName.lastIndexOf(".") +  1);
-                    originName = originName.substring(0, originName.lastIndexOf("."));
-                    long fileSize = file.getSize();
-                File fileSave = new File(uploadPath, fileId + "." + fileExtension);
-                if(!fileSave.exists()) {
-                    fileSave.mkdirs();
+            List<String> uploadedFileList = new ArrayList<>();
+            multipartFiles.forEach(multipartFile -> {
+                if(multipartFile != null) {
+                    log.info("attached file name: {}", multipartFile.getOriginalFilename());
+                    try {
+                        uploadedFileList.add(freeboardService.uploadFiles(multipartFile));
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
                 }
+            });
 
-                file.transferTo(fileSave);
-
-                log.info("\n\n\n");
-                log.info("fileId= {}", fileId);
-                log.info("originName= {}", originName);
-                log.info("fileExtentsion= {}", fileExtension);
-                log.info("fileSize= {}", fileSize);
-                log.info("\n\n\n");
-
-            }
-
-            freeboardService.create(requestDTO, userInfo); // userInfo 값 넣기
+            FreeboardCreateResponseDTO responseDTO = freeboardService.create(requestDTO, userInfo, uploadedFileList);
+            return ResponseEntity.ok().body(responseDTO);
         } catch (RuntimeException e) {
             e.printStackTrace();
             return ResponseEntity
                     .status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("게시글 생성 중 에러가 발생했습니다.");
-        } catch (JsonMappingException e) {
-            throw new RuntimeException(e);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        } catch (IOException e) {
-            return new ResponseEntity<>(null, HttpStatus.CONFLICT);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.badRequest().body("기타 예외가 발생했습니다.");
         }
-
-        return ResponseEntity.ok().body("/api/freeboard"); // 게시글 목록 페이지 이동
     }
-
 
     // 게시글 검색 요청
     @GetMapping("/search")
@@ -139,7 +115,7 @@ public class FreeboardController {
             log.info("게시물 개수: {}", freeboards.size());
             return ResponseEntity.ok().body(detailResponseDTO);
         } else {
-            return ResponseEntity.badRequest().body("게시물이 존재하지 않습니다!");
+            return ResponseEntity.ok().body("검색 결과가 없습니다!");
         }
     }
 
@@ -153,21 +129,41 @@ public class FreeboardController {
     }
 
 
+    /*
     // 게시글 수정 요청
     @PutMapping("/update")
     public ResponseEntity<?> updateFreeboard(
-            @AuthenticationPrincipal TokenMemberInfo userInfo,
             @Validated @RequestBody FreeboardUpdateRequestDTO requestDTO,
+            @RequestPart(value = "attchedFile", required = false) List<MultipartFile> multipartFiles,
             BindingResult result
     ) {
         log.info("/api/freeboard/update update 내용: {}", requestDTO);
         ResponseEntity<List<FieldError>> filedErrors = getValidatedResult(result);
         if (filedErrors != null) return filedErrors;
 
-        FreeListResponseDTO responseDTO = freeboardService.modify(requestDTO, userInfo.getId());
+        freeboardService.modify(requestDTO, requestDTO.getUserId());
+        Freeboard freeboard = freeboardService.getFreeBoard();
+        try {
+            List<String> uploadedFileList = new ArrayList<>();
+            multipartFiles.forEach(multipartFile -> {
+                if(multipartFile != null) {
+                    log.info("attached file name: {}", multipartFile.getOriginalFilename());
+                    try {
+                        uploadedFileList.add((String) multipartFile);
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+            });
+            s3Service.fileDelete((String) multipartFile);
+            FreeboardCreateResponseDTO responseDTO = freeboardService.create(requestDTO, userInfo, uploadedFileList);
+            return ResponseEntity.ok().body(responseDTO);
+        }
 
         return ResponseEntity.ok().body(responseDTO);
     }
+    */
+
 
 
     private static ResponseEntity<List<FieldError>> getValidatedResult(BindingResult result) {

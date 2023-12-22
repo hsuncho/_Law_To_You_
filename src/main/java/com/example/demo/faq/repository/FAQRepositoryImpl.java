@@ -4,7 +4,7 @@ import com.example.demo.faq.entity.FAQ;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
-
+import org.springframework.data.domain.Pageable;
 import java.util.List;
 
 import static com.example.demo.faq.entity.QFAQ.fAQ;
@@ -19,28 +19,32 @@ public class FAQRepositoryImpl implements FAQRepositoryCustom {
         return  queryFactory
                 .select(fAQ.middleSection)
                 .from(fAQ)
-                .where(fAQ.largeSection.trim().eq(largeSection))
+                .where(fAQ.largeSection.trim().startsWith(largeSection.trim()))
                 .distinct()
                 .fetch();
     }
 
     @Override // 중분류에 번호, 중분류, 제목 조회
-    public List<FAQ> findByLargeSec(String faq) {
+    public List<FAQ> findByLargeSec(String faq, Pageable pageable) {
 
         return queryFactory
-                .select(Projections.fields(FAQ.class,fAQ.qno, fAQ.middleSection, fAQ.subject))
+                .select(Projections.fields(FAQ.class,fAQ.qno, fAQ.middleSection, fAQ.subject, fAQ.question, fAQ.answer))
                 .from(fAQ)
-                .where(fAQ.largeSection.trim().eq(faq))
+                .where(fAQ.largeSection.trim().startsWith(faq.trim()))
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
                 .fetch();
     }
 
     @Override
-    public List<FAQ> findByMiddleSec(String largeSection, String middleSection) {
+    public List<FAQ> findByMiddleSec(String largeSection, String middleSection, Pageable pageable) {
         return queryFactory
-                .select(Projections.fields(FAQ.class,fAQ.qno, fAQ.middleSection, fAQ.subject))
+                .select(Projections.fields(FAQ.class,fAQ.qno, fAQ.middleSection, fAQ.subject, fAQ.question, fAQ.answer))
                 .from(fAQ)
-                .where(fAQ.largeSection.trim().eq(largeSection)
-                        .and(fAQ.middleSection.eq(middleSection)))
+                .where(fAQ.largeSection.trim().startsWith(largeSection.trim())
+                        .and(fAQ.middleSection.startsWith(middleSection)))
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
                 .fetch();
     }
 

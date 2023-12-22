@@ -50,17 +50,32 @@ public class FAQService {
     }
 
     public List<String> getDetail(String largeSection) {
+
+
+
         return faqRepository.findByName(largeSection);
 
     }
 
 
-    public List<FAQ> getLargeSecANDMiddleList(String largeSection) {
-        return faqRepository.findByLargeSec(largeSection);
+    public List<FAQ> getLargeSecANDMiddleList(String largeSection, PageDTO dto) {
+        Pageable pageable = PageRequest.of(
+                dto.getPage() - 1,
+                dto.getSize(),
+                Sort.by("qno").ascending()
+        );
+
+        return faqRepository.findByLargeSec(largeSection, pageable);
     }
 
-    public List<FAQ> getMiddleANDList(String largeSection, String middleSection) {
-        return faqRepository.findByMiddleSec(largeSection, middleSection);
+    public List<FAQ> getMiddleANDList(String largeSection, String middleSection, PageDTO dto) {
+        Pageable pageable = PageRequest.of(
+                dto.getPage() - 1,
+                dto.getSize(),
+                Sort.by("qno").ascending()
+        );
+
+        return faqRepository.findByMiddleSec(largeSection, middleSection, pageable);
 
 
     }
