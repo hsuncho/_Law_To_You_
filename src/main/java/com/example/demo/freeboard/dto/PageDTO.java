@@ -1,6 +1,10 @@
 package com.example.demo.freeboard.dto;
 
-import lombok.*;
+import lombok.Builder;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 
 @Getter
 @Setter
@@ -8,7 +12,6 @@ import lombok.*;
 @EqualsAndHashCode
 @Builder
 public class PageDTO {
-
 
     private int page;
     private int size;

@@ -1,26 +1,28 @@
 package com.example.demo.token.auth;
 
-import com.example.demo.member.Member;
-import com.example.demo.member.MemberRepository;
-import com.example.demo.member.lawyer.repository.LawyerRepository;
-import com.example.demo.member.user.repository.UserRepository;
-import com.example.demo.token.dto.TokenDTO;
-import io.jsonwebtoken.*;
-import io.jsonwebtoken.security.Keys;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.stereotype.Component;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
+import com.example.demo.member.Member;
+import com.example.demo.member.lawyer.repository.LawyerRepository;
+import com.example.demo.member.user.repository.UserRepository;
+import com.example.demo.token.dto.TokenDTO;
+
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.Jws;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.UnsupportedJwtException;
+import io.jsonwebtoken.security.Keys;
+import lombok.extern.slf4j.Slf4j;
 
 @Component
 @Slf4j
@@ -40,14 +42,14 @@ public class TokenProvider {
 
     // access token 만료 기한
     private final Date expiry = Date.from(
-//            Instant.now().plus(6, ChronoUnit.HOURS)
-            Instant.now().plus(2, ChronoUnit.MINUTES)
+//            Instant.now().plus(10, ChronoUnit.SECONDS)
+            Instant.now().plus(6, ChronoUnit.HOURS)
     );
 
     // refresh token 만료 기한
     private final Date expiryForRefresh = Date.from(
 //            Instant.now().plus(2, ChronoUnit.WEEKS)
-            Instant.now().plus(10, ChronoUnit.MINUTES)
+            Instant.now().plus(336, ChronoUnit.HOURS)
     );
     
     // TokenDTO를 생성하는 메서드
@@ -112,7 +114,6 @@ public class TokenProvider {
     // 토큰 검증 및 TokenMemberInfo 가져오기
     public TokenMemberInfo validateAndGetTokenMemberInfo(String token) {
         Claims claims = validateToken(token).getBody();
-
         log.info("claims: {}", claims);
 
         return TokenMemberInfo.builder()
@@ -126,7 +127,6 @@ public class TokenProvider {
     public String validateRefreshToken(String token) {
         
         try {
-
             // 1차 토큰 검증
             if(validateToken(token) == null) return null;
 
@@ -147,6 +147,7 @@ public class TokenProvider {
 
             // refresh 토큰의 만료 기한이 지나지 않았을 경우, 새로운 access 토큰 생성 후 return
             if(!claims.getExpiration().before(new Date())) {
+                log.info("\n\n\n 갱신된 accessToken - {}", recreationAccessToken(claims.get("sub").toString(), claims.get("authority")));
                 return recreationAccessToken(claims.get("sub").toString(), claims.get("authority"));
             }
             
