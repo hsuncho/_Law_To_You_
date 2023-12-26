@@ -23,10 +23,10 @@ import java.util.List;
 public class FreeboardCreateRequestDTO {
 
     @NotBlank
-    private String content;
+    private String title;
 
     @NotBlank
-    private String title;
+    private String content;
 
 
 

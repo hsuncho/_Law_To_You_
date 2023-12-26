@@ -14,4 +14,8 @@ public interface FAQRepositoryCustom {
     List<FAQ> findByMiddleSec(String largeSection, String middleSection, Pageable pageable);
 
     List<FAQ> findByMiddleSecQna(String largeSection, String middleSection, int qno);
+
+    int findByLargeSecCnt(String largeSection);
+
+    int findByMiddleSecCnt(String largeSection, String middleSection);
 }

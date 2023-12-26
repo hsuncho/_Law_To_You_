@@ -5,6 +5,7 @@ import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
+
 import java.util.List;
 
 import static com.example.demo.faq.entity.QFAQ.fAQ;
@@ -60,7 +61,24 @@ public class FAQRepositoryImpl implements FAQRepositoryCustom {
                 .fetch();
     }
 
+    @Override
+    public int findByLargeSecCnt(String largeSection) {
+        return Math.toIntExact(queryFactory
+                .select(fAQ.count())
+                .from(fAQ)
+                .where(fAQ.largeSection.startsWith(largeSection))
+                .fetchFirst());
+    }
 
+    @Override
+    public int findByMiddleSecCnt(String largeSection, String middleSection) {
+        return Math.toIntExact(queryFactory
+                .select(fAQ.count())
+                .from(fAQ)
+                .where(fAQ.largeSection.trim().startsWith(largeSection.trim())
+                        .and(fAQ.middleSection.trim().startsWith(middleSection)))
+                .fetchFirst());
+    }
 
 
 }
