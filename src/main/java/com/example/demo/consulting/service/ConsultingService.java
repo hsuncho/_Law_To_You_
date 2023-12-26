@@ -1,6 +1,7 @@
 package com.example.demo.consulting.service;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -175,8 +176,48 @@ public class ConsultingService {
 
         Consulting saved = consultingRepository.save(consulting);
         log.info("깊은 상담 글 작성 정상 수행됨! - saved consulting - {}", saved);
+        saved.setUpdateDate(LocalDateTime.now());
 
         return new UpdatedConsultingDetailResponseDTO(saved);
+
+    }
+
+    public Boolean validateWriter(TokenMemberInfo tokenMemberInfo, int consultNum) {
+
+        log.info("\n\n\ntokenMemberInfo - {}\n\n\n", tokenMemberInfo);
+        log.info("\n\n\ntokenMemberInfo -authority - {}\n\n\n", tokenMemberInfo.getAuthority());
+
+        if(tokenMemberInfo.getAuthority().equals("lawyer")) {
+            return true;
+        }
+        else if(tokenMemberInfo.getAuthority().equals("user")) {
+            return consultingRepository.findById(consultNum).orElseThrow()
+                    .getUser().getId().equals(
+                            tokenMemberInfo.getId());
+        }
+        return false;
+
+    }
+
+    public Boolean validateDetailed(TokenMemberInfo tokenMemberInfo, int consultNum) {
+        // 변호사 계정 모두 인가처리 거부
+        if(tokenMemberInfo.getAuthority().equals("lawyer")) return false;
+        
+        // 깊은 상담 등록은 최초 1회만 가능
+        else if(!consultingRepository.findById(consultNum).orElseThrow()
+                .getUpdateDate().toString().isEmpty()) {
+            return false;
+            
+            // 요청 보낸 token의 정보와 온라인 상담 글을 작성했던 user가 동일인물인가
+        }  else if(tokenMemberInfo.getAuthority().equals("user")) {
+            return tokenMemberInfo.getId().equals(
+                    consultingRepository.findById(consultNum).orElseThrow()
+                            .getUser().getId()
+            );
+        }
+
+        return false;
+
 
     }
 }

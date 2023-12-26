@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.example.demo.consulting.repository.ConsultingRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -104,10 +105,17 @@ public class ConsultingController {
         }
     }
 
-    // 온라인 상담글 상세보기 요청
+    // 온라인 상담글 상세 보기 요청 (해당 글 작성 사용자 + 모든 변호사)
     @GetMapping("/content")
-    public ResponseEntity<?> getContent(int consultNum) {
+    public ResponseEntity<?> getContent(@AuthenticationPrincipal TokenMemberInfo tokenMemberInfo, int consultNum) {
         log.info("/api/counsel/content/{} GET", consultNum);
+
+        log.info("controller - tokenMemberInfo - {}", tokenMemberInfo);
+
+        // 모든 변호사와 온라인 상담글을 작성한 사용자만 상세보기를 허용하도록 검증하는 메서드
+        if(!consultingService.validateWriter(tokenMemberInfo, consultNum)) {
+            return ResponseEntity.badRequest().body("이 글의 상세보기 권한이 없습니다.");
+        }
 
         Consulting consulting = consultingService.getDetail(consultNum).orElseThrow();
 
@@ -119,13 +127,18 @@ public class ConsultingController {
     @PreAuthorize("hasRole('ROLE_user')") // 사용자가 아니라면 인가처리 거부
     public ResponseEntity<?> registerDetailedConsulting(
             @Validated @RequestPart("detailedConsulting") DetailedConsultingRegisterRequestDTO requestDTO,
+            @AuthenticationPrincipal TokenMemberInfo tokenMemberInfo,
             @RequestPart(value="files", required = false) List<MultipartFile> multipartFiles,
             BindingResult result
     ) {
         log.info("/api/consulting/detail PUT!! - payload: {}", requestDTO);
 
+        if(!consultingService.validateDetailed(tokenMemberInfo, requestDTO.getConsultNum())) {
+            return ResponseEntity.badRequest().body("깊은 상담 등록에 관한 권한이 없습니다!");
+        }
+
         if(requestDTO == null) {
-            return ResponseEntity.badRequest().body("등록 온라인 상담 정보를 전달해주세요!");
+            return ResponseEntity.badRequest().body("등록 온라인 상담 정보를 전달해 주세요!");
         }
 
         if(result.hasErrors()) {
@@ -160,7 +173,6 @@ public class ConsultingController {
             e.printStackTrace();
             return ResponseEntity.badRequest().body("기타 예외가 발생했습니다.");
         }
-
 
     }
 
