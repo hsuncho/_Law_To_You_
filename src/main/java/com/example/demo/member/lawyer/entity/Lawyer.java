@@ -2,7 +2,6 @@ package com.example.demo.member.lawyer.entity;
 
 import com.example.demo.answer.entity.Answer;
 import com.example.demo.freeboard.entity.Freeboard;
-import com.example.demo.member.Member;
 import com.example.demo.reply.entity.Reply;
 import lombok.*;
 

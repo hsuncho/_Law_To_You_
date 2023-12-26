@@ -1,22 +1,22 @@
 package com.example.demo.freeboard.service;
 
 
-import javax.annotation.PostConstruct;
-
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-
-import lombok.extern.slf4j.Slf4j;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
-import software.amazon.awssdk.services.s3.model.GetObjectRequest;
-import software.amazon.awssdk.services.s3.model.GetObjectResponse;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.model.S3Exception;
+
+import javax.annotation.PostConstruct;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
 
 @Service
 @Slf4j
@@ -76,27 +76,24 @@ public class S3Service {
                 .toString();
     }
 
-    // 업로드 된 파일 수정
+    // 업로드 된 파일 수정(삭제)
 
-    public void deleteS3Object(String fileName) {
+    public void deleteS3Object(List<String> fileName) {
         try{
 
-            GetObjectResponse originalImage = s3.getObject(GetObjectRequest.builder()
-                            .bucket(bucketName)
-                            .key(uploadFileName(fileName))
-                            .build()).response();
-
-//            byte[] imageBytes = new byte[(long) originalImage.contentLength()];
-
-
-        DeleteObjectRequest deleteObjectRequest = DeleteObjectRequest.builder()
-                .bucket(bucketName)
-                .key(uploadFileName(fileName))
-                .build();
+         fileName.forEach(url -> {
+             String fileUrlName = url.substring(url.lastIndexOf("/") + 1);
+             String encodedFileName = URLDecoder.decode(fileUrlName, StandardCharsets.UTF_8);
+             DeleteObjectRequest deleteObjectRequest = DeleteObjectRequest.builder()
+                     .bucket(bucketName)
+                     .key(encodedFileName)
+                     .build();
 
 
-            log.info("File delete Success!!");
-            s3.deleteObject(deleteObjectRequest);
+             log.info("File delete Success!! {}", encodedFileName);
+             s3.deleteObject(deleteObjectRequest);
+         });
+
         } catch (S3Exception e) {
             log.info(e.getMessage());
         }

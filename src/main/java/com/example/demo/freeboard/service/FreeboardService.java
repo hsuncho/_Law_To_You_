@@ -31,7 +31,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 @Service
@@ -50,17 +49,16 @@ public class FreeboardService {
         Pageable pageable = PageRequest.of(
                 dto.getPage() - 1,
                 dto.getSize(),
-                Sort.by("rowNum").ascending()
+                Sort.by("regDate").descending()
         );
 
         Page<Freeboard> freeboards = freeboardRepository.findAll(pageable);
 
         List<Freeboard> freeList = freeboards.getContent();
 
-        AtomicInteger rowNum = new AtomicInteger(1); //람다식에선 외부변수 변경이 불가하므로 AtomicInteger를 사용하여 1씩증가시킴
         List<FreeboardDetailResponseDTO> detailList
                 = freeList.stream()
-                .map(freeboard -> new FreeboardDetailResponseDTO(rowNum.getAndIncrement(), freeboard))
+                .map(freeboard -> new FreeboardDetailResponseDTO("전체 요청",freeboard))
                 .collect(Collectors.toList());
 
         return FreeListResponseDTO.builder()
@@ -113,39 +111,58 @@ public class FreeboardService {
         return user;
     }
 
-    /*
-    public FreeListResponseDTO modify(FreeboardUpdateRequestDTO dto, String userId) {
 
+    @Transactional
+    public FreeboardDetailResponseDTO modify(FreeboardUpdateRequestDTO dto,
+                                             List<String> uploadedFileList) {
 
-        freeboardRepository.findById(getUser(userInfo.getId())).orElseThrow(
-                () -> new RuntimeException(bno + "번 게시물이 존재하지 않습니다!")
-        Optional<Freeboard> byId = freeboardRepository.findById(dto.getBno());
+            List<FreeboardFile> filesToDelete = freeboardFileRepository.findByBno(dto.getBno());
+            List<String> deleteFile = filesToDelete.stream()
+                    .map(FreeboardFile::getRoute)
+                    .collect(Collectors.toList());
+            s3Service.deleteS3Object(deleteFile);
 
+            filesToDelete.forEach(freeboardFile -> {
+                freeboardFileRepository.delete(freeboardFile);
+                freeboardFileRepository.flush();
+            });
 
-        byId.ifPresent(freeboard -> {
+            Freeboard freeboard = freeboardRepository.findById(dto.getBno()).orElseThrow();
             freeboard.setTitle("(수정됨) " + dto.getTitle());
             freeboard.setContent(dto.getContent());
             freeboard.setRegDate(LocalDateTime.now());
 
-            freeboardRepository.save(freeboard);
-        });
+
+            if (uploadedFileList != null) {
+                uploadedFileList.forEach(file -> {
+                    FreeboardFile freeboardFile = new FreeboardFileDTO(file).toEntity(freeboard);
+                    freeboardFileRepository.save(freeboardFile);
+                });
+            }
+
+            Freeboard saved = freeboardRepository.save(freeboard);
+
+            log.info("게시글 수정 정상 작동! {}", saved);
+            return new FreeboardDetailResponseDTO(saved);
 
 
-        return retrieve(userId);
-        
     }
 
+    // 게시글 작성자가 맞는지 여부 확인
+    public boolean userTrue(TokenMemberInfo memberInfo, int bno) {
+        User user = userRepository.findById(memberInfo.getId()).orElseThrow();
 
-    private Freeboard getFreeBoard(int bno) {
-        return
-        );
+        return freeboardRepository.findByUserBoard(user, bno);
     }
- */
 
     // 검색
     public List<Freeboard> search(String search, boolean flag) {
         return freeboardRepository.findByContent(search, flag);
 
+    }
+    // 검색시 게시물 수
+    public int searchCNT(String search, boolean flag) {
+        return freeboardRepository.findByContentCNT(search, flag);
     }
 
     public Optional<Freeboard> getDetail(int bno) {
@@ -158,6 +175,24 @@ public class FreeboardService {
         String uploadFile = s3Service.uploadToS3Bucket(multipartFile.getBytes(), uniqueFilename); // 파일을 바이트로 변환후 집어넣기
 
         return uploadFile;
+
+    }
+
+    public void delete(int bno) {
+        Freeboard freeboard = freeboardRepository.findById(bno).orElseThrow();
+        List<FreeboardFile> filesToDelete = freeboardFileRepository.findByBno(bno);
+        List<String> deleteFile = filesToDelete.stream()
+                .map(FreeboardFile::getRoute)
+                .collect(Collectors.toList());
+        s3Service.deleteS3Object(deleteFile);
+
+        filesToDelete.forEach(freeboardFile -> {
+            freeboardFileRepository.delete(freeboardFile);
+            freeboardFileRepository.flush();
+        });
+
+        freeboardRepository.delete(freeboard);
+
 
     }
 

@@ -12,27 +12,20 @@ import java.util.List;
 @Getter
 @ToString
 @EqualsAndHashCode
-@NoArgsConstructor
 @Builder
 @Slf4j
 public class FAQMiddleSecAndList {
 
+    private int largeCount;
 
     private List<String> middleSection = new ArrayList<>();
 
-
     private List<FAQMiddleAndQMSDTO> listSearchedByLargeSec = new ArrayList<>();
 
-
-    public FAQMiddleSecAndList(List<String> middleList, List<FAQMiddleAndQMSDTO> list) {
-
-        // 리스트 변경
-        this.middleSection.addAll(middleList);
-
-        this.listSearchedByLargeSec.addAll(list);
-
-
+    public FAQMiddleSecAndList(int count, List<String> middleSec, List<FAQMiddleAndQMSDTO> largeSecList) {
+        this.largeCount = count;
+        this.middleSection = middleSec;
+        this.listSearchedByLargeSec = largeSecList;
     }
-
 
 }

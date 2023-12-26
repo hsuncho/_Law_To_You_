@@ -1,7 +1,6 @@
 package com.example.demo.freeboard.repository;
 
 import com.example.demo.freeboard.entity.Freeboard;
-import com.example.demo.member.user.entity.QUser;
 import com.example.demo.member.user.entity.User;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -35,6 +34,28 @@ public class FreeboardRepositoryImpl implements FreeboardRepositoryCustom {
                 .where(freeboard.user.id.eq(user.getId()))
                 .fetch();
     }
+
+    @Override
+    public boolean findByUserBoard(User user, int bno) {
+        return queryFactory
+                .select(freeboard.bno)
+                .from(freeboard)
+                .where(freeboard.bno.eq(bno)
+                        .and(freeboard.user.id.eq(user.getId())))
+                .fetchFirst() != null;
+    }
+
+    // 검색시 게시물 개수
+    @Override
+    public int findByContentCNT(String search, boolean flag) {
+        return Math.toIntExact(queryFactory
+                .select(freeboard.count())
+                .from(freeboard)
+                .where(writerSelect(search, flag)
+                        ,titleAndContent(search, flag))
+                .fetchFirst());
+    }
+
 
     private BooleanExpression writerSelect(String content, Boolean flag) {
         return flag ? freeboard.writer.trim().contains(content.trim()) : null;

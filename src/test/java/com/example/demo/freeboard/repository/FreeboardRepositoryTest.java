@@ -1,5 +1,6 @@
 package com.example.demo.freeboard.repository;
 
+import com.example.demo.faq.entity.FAQ;
 import com.example.demo.freeboard.entity.Freeboard;
 import com.example.demo.member.lawyer.entity.Lawyer;
 import com.example.demo.member.lawyer.repository.LawyerRepository;
@@ -19,6 +20,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.EntityManagerFactory;
 import java.util.List;
 import java.util.Optional;
 
@@ -123,6 +125,16 @@ class FreeboardRepositoryTest {
         //then
         System.out.println("글 불러오기:" + result);
     }
+    @Autowired
+    private EntityManagerFactory emf;
 
+@Test
+@DisplayName("ds")
+void sd() {
+    //given
+    emf.getCache().evict(FAQ .class);
+    //when
 
+    //then
+}
 }

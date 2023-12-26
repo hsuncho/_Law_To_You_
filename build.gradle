@@ -66,11 +66,30 @@ dependencies {
 	annotationProcessor "com.querydsl:querydsl-apt:${queryDslVersion}"
 
 	// S3 라이브러리 아마존 서비스에 접근해서 사용하는
-//	implementation 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE'
-
-	// S3 라이브러리 아마존 서비스에 접근해서 사용하는
 	implementation 'software.amazon.awssdk:s3:2.17.52'
 
+	// 이메일 인증
+	implementation 'javax.mail:mail:1.4.7'
+	// Spring Context Support
+	implementation 'org.springframework:spring-context-support:5.3.9'
+	// redis
+	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+	// Spring Boot Thymeleaf 의존성 추가
+	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+
+	// Iamport 클라이언트 라이브러리 의존성 추가
+	implementation 'com.github.iamport:iamport-rest-client-java:0.2.21'
+
+	implementation 'org.springframework.boot:spring-boot-starter-webflux'
+}
+
+
+// 전체 프로젝트에 대한 저장소 설정 추가
+allprojects {
+	repositories {
+		// JitPack 저장소 추가
+		maven { url 'https://jitpack.io' }
+	}
 }
 
 

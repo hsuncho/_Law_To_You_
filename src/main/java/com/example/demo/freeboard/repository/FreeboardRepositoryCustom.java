@@ -11,4 +11,8 @@ public interface FreeboardRepositoryCustom {
 
     List<Freeboard> findAllByUser(User user);
 
+    // 게시물이 해당 유저가 쓴게 맞는지
+    boolean findByUserBoard(User user, int bno);
+
+    int findByContentCNT(String search, boolean flag);
 }

@@ -44,22 +44,16 @@ public class FAQController {
 
         try {
             PageDTO pageDTO = new PageDTO(page, size);
-            List<String> middleList = faqService.getDetail(largeSection); // 중분류 리스트
-
             // 대분류 기준 리스트 List<FAQ>
             List<FAQ> list = faqService.getLargeSecANDMiddleList(largeSection, pageDTO);
             List<FAQMiddleAndQMSDTO> response = new ArrayList<>();
-            int rowNum = 1;
             for(FAQ faq : list) {
-                response.add(new FAQMiddleAndQMSDTO(rowNum, faq.getQno(), faq.getMiddleSection(),
+                response.add(new FAQMiddleAndQMSDTO(faq.getQno(), faq.getMiddleSection(),
                                                     faq.getSubject(), faq.getQuestion(), faq.getAnswer()));
-                rowNum++;
             }
 
-            FAQMiddleSecAndList dto = new FAQMiddleSecAndList(middleList, response);
-
-
-            return ResponseEntity.ok().body(dto);
+            FAQMiddleSecAndList dto = faqService.getDetail(largeSection, response);
+            return ResponseEntity.ok().body(new FAQMiddleSecAndList(dto.getLargeCount(), dto.getMiddleSection(), dto.getListSearchedByLargeSec()));
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.badRequest().body(e.getMessage());
@@ -79,15 +73,17 @@ public class FAQController {
             PageDTO pageDTO = new PageDTO(page, size);
 
             List<FAQ> qnaList = faqService.getMiddleANDList(largeSection, middleSection, pageDTO);
+            int middleCount = faqService.getMiddleSecCnt(largeSection, middleSection);
             List<FAQMiddleSecAndSubjectDTO> qna = new ArrayList<>();
-            int rowNum = 1;
             for(FAQ faq : qnaList) {
-                qna.add(new FAQMiddleSecAndSubjectDTO(rowNum, faq.getMiddleSection(), faq.getSubject()
+                qna.add(new FAQMiddleSecAndSubjectDTO(faq.getMiddleSection(), faq.getSubject()
                                                         , faq.getQuestion(), faq.getAnswer()));
-                rowNum++;
             }
 
-            return ResponseEntity.ok().body(qna);
+
+
+
+            return ResponseEntity.ok().body(new FAQListCountDTO(middleCount, qna));
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.badRequest().body(e.getMessage());

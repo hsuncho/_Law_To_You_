@@ -1,8 +1,6 @@
 package com.example.demo.faq.service;
 
-import com.example.demo.faq.dto.FAQDetailResponseDTO;
-import com.example.demo.faq.dto.FAQListResponseDTO;
-import com.example.demo.faq.dto.PageResponseDTO;
+import com.example.demo.faq.dto.*;
 import com.example.demo.faq.entity.FAQ;
 import com.example.demo.faq.repository.FAQRepository;
 import com.example.demo.freeboard.dto.PageDTO;
@@ -49,11 +47,13 @@ public class FAQService {
                 .build();
     }
 
-    public List<String> getDetail(String largeSection) {
+    public FAQMiddleSecAndList getDetail(String largeSection, List<FAQMiddleAndQMSDTO> listSearchedByMiddle) {
 
-
-
-        return faqRepository.findByName(largeSection);
+        return FAQMiddleSecAndList.builder()
+                .largeCount(faqRepository.findByLargeSecCnt(largeSection)) // 대분류 클릭시 전체 행 개수
+                .listSearchedByLargeSec(listSearchedByMiddle)
+                .middleSection(faqRepository.findByName(largeSection))
+                .build();
 
     }
 
@@ -80,9 +80,14 @@ public class FAQService {
 
     }
 
+    public int getMiddleSecCnt(String largeSection, String middleSection) {
+        return faqRepository.findByMiddleSecCnt(largeSection,middleSection);
+    }
+
     public List<FAQ> getMiddleANDQna(String largeSection, String middleSection, int qno) {
         return faqRepository.findByMiddleSecQna(largeSection, middleSection, qno);
     }
+
 }
 
 

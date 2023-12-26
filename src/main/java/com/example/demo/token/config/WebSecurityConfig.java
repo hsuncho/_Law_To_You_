@@ -44,7 +44,7 @@ public class WebSecurityConfig {
                 .antMatchers("/api/user/logout").authenticated()
                 .antMatchers("/", "/api/user/**", "/api/lawyer/**","/api/counsel/content/**", "/api/answer").permitAll()
 //                .antMatchers("/api/user/logout").authenticated()
-                .antMatchers("/api/faq/**", "/", "/api/user/**", "/api/lawyer/**").permitAll()
+                .antMatchers("/api/faq/**", "/", "/api/user/**", "/api/lawyer/**", "*/verifyIamport/**").permitAll()
                 .anyRequest().authenticated();
 
         // 토큰 인증 필터 연결
