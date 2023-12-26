@@ -14,15 +14,12 @@ public class LoginResponseDTO {
 
     private String accessToken;
 
-    private String refreshToken;
-
     private String authority;
 
     public LoginResponseDTO(Member member, TokenDTO tokenDTO) {
         this.id = member.getId();
         this.authority = member.getAuthority();
         this.accessToken = tokenDTO.getAccessToken();
-        this.refreshToken = tokenDTO.getRefreshToken();
     }
 
 }

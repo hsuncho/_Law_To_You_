@@ -63,6 +63,7 @@ public class UserController {
         return ResponseEntity.ok().body(resultFlag);
     }
 
+    // 닉네임 중복 확인
     @GetMapping("/checkName")
     public ResponseEntity<?> checkName(String nickname) {
         if(nickname.trim().isEmpty()) {
@@ -88,17 +89,14 @@ public class UserController {
         String nickname = dto.getNickname();
 
         if(userService.isDuplicateId(id)) {
-            log.warn("아이디가 중복되었습니다. - {}", id);
             return ResponseEntity.badRequest().body("아이디가 중복되었습니다.");
         }
 
         if(userService.isDuplicateEmail(email)) {
-            log.warn("이메일이 중복되었습니다. - {}", email);
             return ResponseEntity.badRequest().body("이메일이 중복되었습니다.");
         }
 
         if(userService.isDuplicateNickname(nickname)) {
-            log.warn("닉네임이 중복되었습니다. - {}", nickname);
             return ResponseEntity.badRequest().body("닉네임이 중복되었습니다.");
         }
 
