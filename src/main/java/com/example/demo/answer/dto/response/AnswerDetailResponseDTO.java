@@ -23,6 +23,8 @@ public class AnswerDetailResponseDTO {
 
     private int reqHammer;
 
+    private int adopt;
+
     public AnswerDetailResponseDTO(Answer saved) {
 
         this.answerNum = saved.getAnswerNum();
@@ -30,6 +32,7 @@ public class AnswerDetailResponseDTO {
         this.writer = saved.getWriter();
         this.shortAns = saved.getShortAns();
         this.reqHammer = saved.getReqHammer();
+        this.adopt = saved.getAdopt();
     }
 
 

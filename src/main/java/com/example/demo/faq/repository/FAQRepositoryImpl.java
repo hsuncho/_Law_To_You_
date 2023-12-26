@@ -9,6 +9,7 @@ import java.util.List;
 
 import static com.example.demo.faq.entity.QFAQ.fAQ;
 
+
 @RequiredArgsConstructor
 public class FAQRepositoryImpl implements FAQRepositoryCustom {
 

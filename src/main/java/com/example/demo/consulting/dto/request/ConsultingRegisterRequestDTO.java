@@ -1,12 +1,10 @@
 package com.example.demo.consulting.dto.request;
 
 import com.example.demo.consulting.entity.Consulting;
-import com.example.demo.consulting.entity.ConsultingFile;
 import com.example.demo.member.user.entity.User;
 import lombok.*;
 
 import javax.validation.constraints.NotBlank;
-import java.util.List;
 
 @Getter @Setter
 @ToString @EqualsAndHashCode

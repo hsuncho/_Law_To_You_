@@ -1,13 +1,11 @@
 package com.example.demo.consulting.dto.response;
 
 import com.example.demo.consulting.entity.Consulting;
-import com.example.demo.consulting.entity.ConsultingFile;
 import com.example.demo.consulting.entity.DetailedConsultingFile;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;
 
 import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 

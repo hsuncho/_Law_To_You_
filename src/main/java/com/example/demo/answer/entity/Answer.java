@@ -40,13 +40,11 @@ public class Answer {
     @CreationTimestamp
     private LocalDateTime regDate;
 
-    private String attachedFile;
-
     @Column(nullable = false)
     private int reqHammer;
 
     // 작성자 - 변호사 이름 조회
-    @OneToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "lawyer_id")
     private Lawyer lawyer;
 

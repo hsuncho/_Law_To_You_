@@ -17,10 +17,11 @@ import java.util.List;
 @Slf4j
 public class FAQMiddleSecAndList {
 
-
+    @Builder.Default
     private List<String> middleSection = new ArrayList<>();
 
 
+    @Builder.Default
     private List<FAQMiddleAndQMSDTO> listSearchedByLargeSec = new ArrayList<>();
 
 
