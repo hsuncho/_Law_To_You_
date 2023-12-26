@@ -2,7 +2,6 @@ package com.example.demo.member.lawyer.entity;
 
 import com.example.demo.answer.entity.Answer;
 import com.example.demo.freeboard.entity.Freeboard;
-import com.example.demo.member.Member;
 import com.example.demo.reply.entity.Reply;
 import lombok.*;
 
@@ -65,8 +64,8 @@ public class Lawyer {
     private List<Reply> replyList = new ArrayList<>();
 
     // 답변(answer)
-    @OneToOne(mappedBy = "lawyer", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Answer answer;
+    @OneToMany(mappedBy = "lawyer", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Answer> answerList;
 
     public void setRefreshToken(String token) {
         this.refreshToken = token;
