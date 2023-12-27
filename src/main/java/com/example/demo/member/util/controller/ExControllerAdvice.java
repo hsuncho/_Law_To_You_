@@ -18,4 +18,5 @@ public class ExControllerAdvice {
         ErrorResult errorResult = new ErrorResult("EMAIL", e.getMessage());
         return new ResponseEntity<>(errorResult, HttpStatus.BAD_REQUEST);
     }
+
 }

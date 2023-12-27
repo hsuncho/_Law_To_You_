@@ -423,13 +423,23 @@ public class UserService {
 
         // 네이버 로그아웃
         if(member.getAuthority().equals("user") && member.getUser().getJoinMethod().equals("naver")) {
-            String reqUri = "https://kapi.kakao.com/v1/user/logout";
-            HttpHeaders headers = new HttpHeaders();
-            headers.add("Authorization", "Bearer " + accessToken);
+            String reqUri = "https://nid.naver.com/oauth2.0/token";
+
+
+            MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+            params.add("grant_type", "delete");
+            params.add("client_id", NAVER_CLIENT_ID);
+            params.add("client_secret", NAVER_CLIENT_SECRET);
+            params.add("access_token", accessToken);
+            params.add("service_provider", "NAVER");
+
+            // 헤더와 바디 정보를 합치기 위해 HttpEntity 객체 생성
+            HttpEntity<Object> requestEntity = new HttpEntity<>(params);
+
+            log.info("logout: {}", requestEntity);
 
             RestTemplate template = new RestTemplate();
-            ResponseEntity<String> responseData
-                    = template.exchange(reqUri, HttpMethod.POST, new HttpEntity<>(headers), String.class);
+            ResponseEntity<String> responseData = template.postForEntity(reqUri, requestEntity, String.class);
 
             return responseData.getBody();
         }
