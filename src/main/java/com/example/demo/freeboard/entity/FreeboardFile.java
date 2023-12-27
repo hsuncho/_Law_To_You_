@@ -11,7 +11,7 @@ import javax.persistence.*;
 @Builder
 
 @Entity
-@Table(name = "freeboardfile")
+@Table(name = "freeboard_file")
 public class FreeboardFile {
 
     @Id

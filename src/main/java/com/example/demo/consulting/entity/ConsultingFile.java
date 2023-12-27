@@ -13,7 +13,7 @@ import javax.persistence.*;
 @AllArgsConstructor
 @Builder
 @Entity
-@Table(name = "consultingfile")
+@Table(name = "consulting_file")
 public class ConsultingFile {
 
     @Id

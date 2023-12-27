@@ -11,7 +11,7 @@ import javax.persistence.*;
 @NoArgsConstructor @AllArgsConstructor
 @Builder
 @Entity
-@Table(name = "answerfile")
+@Table(name = "answer_file")
 public class AnswerFile {
 
     @Id
