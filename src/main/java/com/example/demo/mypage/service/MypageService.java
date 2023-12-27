@@ -60,4 +60,9 @@ public class MypageService {
         return  new UserDetailResponseDTO(saved);
 
     }
+
+    public void hammerCharge(int hammer, TokenMemberInfo userInfo) {
+
+
+    }
 }

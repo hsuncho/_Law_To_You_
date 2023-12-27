@@ -4,10 +4,8 @@ import com.example.demo.member.user.dto.request.LoginRequestDTO;
 import com.example.demo.member.user.dto.request.UserJoinRequestDTO;
 import com.example.demo.member.user.dto.response.LoginResponseDTO;
 import com.example.demo.member.user.dto.response.UserJoinResponseDTO;
-import com.example.demo.member.user.repository.UserRepository;
 import com.example.demo.member.user.service.UserService;
 import com.example.demo.token.auth.TokenMemberInfo;
-import com.example.demo.token.auth.TokenProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.Map;
+import java.util.UUID;
 
 
 @RestController
@@ -28,7 +27,7 @@ import java.util.Map;
 public class UserController {
 
     private final UserService userService;
-    private final TokenProvider tokenProvider;
+
 
     @GetMapping("/test")
     public String test() {
@@ -145,13 +144,33 @@ public class UserController {
         return ResponseEntity.ok().body(responseDTO);
     }
 
-    private final UserRepository userRepository;
 
      //카카오 토큰 갱신 API
     @GetMapping("/kakao")
     public ResponseEntity<?> updateKakaoToken(String code) {
         Map<String, Object> responseData = userService.updateKakaoToken(code);
         return ResponseEntity.ok().body(responseData);
+    }
+
+
+    // 네이버 로그인
+    @GetMapping("/naverLogin")
+    public ResponseEntity<?> naverLogin(@RequestParam String code) {
+        log.info("/api/user/naverLogin - GET! -code: {} state: {}", code);
+
+        String state = UUID.randomUUID().toString();
+
+        LoginResponseDTO responseDTO = userService.naverService(code, state);
+
+        return ResponseEntity.ok().body(responseDTO);
+    }
+
+    //네이버 토큰 갱신 API
+    @GetMapping("/naver")
+    public ResponseEntity<?> updateNaverToken(@RequestParam String code, @RequestParam String state) {
+        Map<String, Object> responseData = userService.updateNaverToken(code, state);
+        return ResponseEntity.ok().body(responseData);
+
     }
 
     // 로그아웃 처리

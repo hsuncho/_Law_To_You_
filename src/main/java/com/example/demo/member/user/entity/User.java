@@ -68,5 +68,7 @@ public class User {
         this.accessToken = token;
     }
 
-
+    public void setHammer(int hammer) {
+        this.hammer = hammer;
+    }
 }

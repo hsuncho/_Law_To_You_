@@ -1,6 +1,7 @@
 package com.example.demo.freeboard.repository;
 
 import com.example.demo.freeboard.entity.Freeboard;
+import com.example.demo.member.lawyer.entity.Lawyer;
 import com.example.demo.member.user.entity.User;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -42,6 +43,16 @@ public class FreeboardRepositoryImpl implements FreeboardRepositoryCustom {
                 .from(freeboard)
                 .where(freeboard.bno.eq(bno)
                         .and(freeboard.user.id.eq(user.getId())))
+                .fetchFirst() != null;
+    }
+
+    @Override
+    public boolean findByLawyerBoard(Lawyer lawyer, int bno) {
+        return queryFactory
+                .select(freeboard.bno)
+                .from(freeboard)
+                .where(freeboard.bno.eq(bno)
+                        .and(freeboard.lawyer.lawyerId.eq(lawyer.getLawyerId())))
                 .fetchFirst() != null;
     }
 

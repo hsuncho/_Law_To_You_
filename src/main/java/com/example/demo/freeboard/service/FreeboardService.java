@@ -12,6 +12,10 @@ import com.example.demo.freeboard.entity.Freeboard;
 import com.example.demo.freeboard.entity.FreeboardFile;
 import com.example.demo.freeboard.repository.FreeboardFileRepository;
 import com.example.demo.freeboard.repository.FreeboardRepository;
+import com.example.demo.member.Member;
+import com.example.demo.member.MemberRepository;
+import com.example.demo.member.lawyer.entity.Lawyer;
+import com.example.demo.member.lawyer.repository.LawyerRepository;
 import com.example.demo.member.user.entity.User;
 import com.example.demo.member.user.repository.UserRepository;
 import com.example.demo.token.auth.TokenMemberInfo;
@@ -41,6 +45,8 @@ public class FreeboardService {
 
     private final FreeboardRepository freeboardRepository;
     private final UserRepository userRepository;
+    private final LawyerRepository lawyerRepository;
+    private final MemberRepository memberRepository;
     private final FreeboardFileRepository freeboardFileRepository;
     private final S3Service s3Service;
 
@@ -88,9 +94,16 @@ public class FreeboardService {
             List<String> uploadedFileList) throws Exception {
 
         // 토큰에서 아이디값을 가져와야함
-        User user = userRepository.findById(userInfo.getId()).orElseThrow();
-
-        Freeboard freeboard = freeboardRepository.save(requestDTO.toEntity(user));
+        Optional<User> userOptional = userRepository.findById(userInfo.getId());
+        Optional<Lawyer> lawyerOptional = lawyerRepository.findById(userInfo.getId());
+        Freeboard freeboard;
+        if (userOptional.isPresent()) {
+            User user = userOptional.get();
+             freeboard = freeboardRepository.save(requestDTO.toEntity(user));
+        } else {
+            Lawyer lawyer = lawyerOptional.get();
+            freeboard = freeboardRepository.save(requestDTO.toEntity(lawyer));
+        }
 
         log.info("게시글 작성 완료! 제목: {}", requestDTO.getTitle());
         List<FreeboardFile> freeboardList = new ArrayList<>();
@@ -110,7 +123,6 @@ public class FreeboardService {
         );
         return user;
     }
-
 
     @Transactional
     public FreeboardDetailResponseDTO modify(FreeboardUpdateRequestDTO dto,
@@ -150,9 +162,17 @@ public class FreeboardService {
 
     // 게시글 작성자가 맞는지 여부 확인
     public boolean userTrue(TokenMemberInfo memberInfo, int bno) {
-        User user = userRepository.findById(memberInfo.getId()).orElseThrow();
+        Member member = memberRepository.findById(memberInfo.getId()).orElseThrow();
+        User user = null;
+        Lawyer lawyer = null;
+        if (member.getAuthority().equals("user")) {
+            user = userRepository.findById(memberInfo.getId()).orElseThrow();
+            return freeboardRepository.findByUserBoard(user, bno);
+        } else {
+            lawyer = lawyerRepository.findById(memberInfo.getId()).orElseThrow();
+            return freeboardRepository.findByLawyerBoard(lawyer, bno);
+        }
 
-        return freeboardRepository.findByUserBoard(user, bno);
     }
 
     // 검색
