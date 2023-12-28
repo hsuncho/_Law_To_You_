@@ -15,8 +15,8 @@ public class ConsultingFileDTO {
 
     public ConsultingFile toEntity(Consulting saved) {
         return ConsultingFile.builder()
-                .route(this.route)
                 .consulting(saved)
+                .route(this.route)
                 .build();
     }
 }

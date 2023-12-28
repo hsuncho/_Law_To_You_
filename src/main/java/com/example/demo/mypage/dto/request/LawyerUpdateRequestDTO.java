@@ -6,12 +6,11 @@ import lombok.*;
 @ToString @EqualsAndHashCode
 @NoArgsConstructor @AllArgsConstructor
 @Builder
-public class UserUpdateRequestDTO {
+public class LawyerUpdateRequestDTO {
 
     private String id;
 
     private String password;
 
-    private String nickname;
 
 }

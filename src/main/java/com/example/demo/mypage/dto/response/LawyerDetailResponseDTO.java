@@ -1,6 +1,7 @@
 package com.example.demo.mypage.dto.response;
 
 import com.example.demo.member.lawyer.entity.Lawyer;
+import com.example.demo.member.user.entity.User;
 import lombok.*;
 
 import javax.validation.constraints.Email;
@@ -13,10 +14,10 @@ import javax.validation.constraints.NotBlank;
 public class LawyerDetailResponseDTO {
 
     @NotBlank
-    private String name;
+    private String id;
 
     @NotBlank
-    private String id;
+    private String name;
 
     @Email
     @NotBlank
@@ -24,10 +25,11 @@ public class LawyerDetailResponseDTO {
 
     private boolean approval;
 
-    public LawyerDetailResponseDTO(Lawyer lawyer) {
-        this.name = lawyer.getName();
-        this.id = lawyer.getLawyerId();
-        this.email = lawyer.getEmail();
-        this.approval = lawyer.isApproval();
+    public LawyerDetailResponseDTO(Lawyer saved) {
+        this.id = saved.getLawyerId();
+        this.name = saved.getName();
+        this.email = saved.getEmail();
+        this.approval = saved.isApproval();
     }
+
 }
