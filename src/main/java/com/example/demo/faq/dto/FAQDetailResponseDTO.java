@@ -36,5 +36,4 @@ public class FAQDetailResponseDTO {
         this.subject = faq.getSubject();
 
     }
-
 }

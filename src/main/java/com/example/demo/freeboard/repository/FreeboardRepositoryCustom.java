@@ -1,6 +1,7 @@
 package com.example.demo.freeboard.repository;
 
 import com.example.demo.freeboard.entity.Freeboard;
+import com.example.demo.member.lawyer.entity.Lawyer;
 import com.example.demo.member.user.entity.User;
 
 import java.util.List;
@@ -13,6 +14,8 @@ public interface FreeboardRepositoryCustom {
 
     // 게시물이 해당 유저가 쓴게 맞는지
     boolean findByUserBoard(User user, int bno);
+    // 게시물이 해당 변호사가 쓴게 맞는지
+    boolean findByLawyerBoard(Lawyer user, int bno);
 
     int findByContentCNT(String search, boolean flag);
 }

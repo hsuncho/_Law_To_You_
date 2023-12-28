@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 public class FreeboardCreateResponseDTO {
 
     private String title;
+    private String writer;
     private String content;
     private List<String> routes;
 
@@ -29,6 +30,7 @@ public class FreeboardCreateResponseDTO {
     public FreeboardCreateResponseDTO(Freeboard saved) {
         this.title = saved.getTitle();
         this.content = saved.getContent();
+        this.writer = saved.getWriter();
         this.regDate = saved.getRegDate();
         this.routes = saved.getFreeboardFiles().stream()
                 .map(FreeboardFile::getRoute)

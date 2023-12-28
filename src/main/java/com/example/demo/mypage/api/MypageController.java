@@ -1,5 +1,7 @@
 package com.example.demo.mypage.api;
 
+import com.example.demo.member.lawyer.service.LawyerService;
+import com.example.demo.member.user.entity.User;
 import com.example.demo.answer.dto.response.DetailedResponseDTO;
 import com.example.demo.answer.entity.Answer;
 import com.example.demo.consulting.entity.Consulting;
@@ -37,6 +39,7 @@ public class MypageController {
     private final ConsultingRepository consultingRepository;
     private final MypageService mypageService;
     private final UserService userService;
+    private final LawyerService lawyerService;
 
     // 사용자 정보 조회
     @GetMapping
@@ -136,6 +139,38 @@ public class MypageController {
     ) {
         FreeListResponseDTO responseDTO = mypageService.getList(new PageDTO(page, size), tokenMemberInfo);
         return ResponseEntity.ok().body(responseDTO);
+    }
+    
+    // 법봉 충전
+    @PutMapping("/charge")
+    @PreAuthorize("hasRole('ROLE_user')")
+    public ResponseEntity<?> getHammerCharge(@RequestParam int hammer,
+                                          @AuthenticationPrincipal TokenMemberInfo userInfo) {
+        userService.getHammerCharge(hammer, userInfo);
+
+        return ResponseEntity.ok().body("법봉 "+ hammer + "개가 정상 충전되었습니다.");
+
+    }
+
+    // 법봉 환급
+    @PutMapping("/refund")
+    @PreAuthorize("hasRole('ROLE_lawyer')")
+    public ResponseEntity<?> setHammerCharge(@RequestParam int hammer,
+                                             @AuthenticationPrincipal TokenMemberInfo userInfo) {
+
+        if(lawyerService.setHammerCharge(hammer, userInfo)) { // true라면
+        return ResponseEntity.ok().body("법봉 " + hammer + "개가 정상 환급 처리 되었습니다.");
+        };
+        return ResponseEntity.badRequest().body("법봉의 개수가 부족합니다.");
+    }
+
+    // 법봉 조회
+    @GetMapping("/hammer")
+    public ResponseEntity<?> hammerCnt(@AuthenticationPrincipal TokenMemberInfo userInfo) {
+
+        int hammerCnt = userService.hammerCnt(userInfo);
+
+        return ResponseEntity.ok().body("법봉의 개수는 " + hammerCnt + "개 입니다.");
     }
 
     // 사용자가 등록한 온라인 상담 내역 목록

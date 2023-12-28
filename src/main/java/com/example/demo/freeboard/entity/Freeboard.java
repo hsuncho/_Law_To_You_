@@ -5,6 +5,7 @@ import com.example.demo.reply.entity.Reply;
 import com.example.demo.member.user.entity.User;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
+import org.springframework.web.bind.annotation.CrossOrigin;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -18,8 +19,8 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-
 @Entity
+@CrossOrigin
 public class Freeboard {
 
     @Id

@@ -8,10 +8,12 @@ import com.example.demo.member.lawyer.dto.response.LawyerJoinResponseDTO;
 import com.example.demo.member.lawyer.entity.Lawyer;
 import com.example.demo.member.lawyer.repository.LawyerRepository;
 import com.example.demo.member.user.service.UserService;
+import com.example.demo.token.auth.TokenMemberInfo;
 import com.example.demo.token.auth.TokenProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -67,4 +69,16 @@ public class LawyerService {
         return uniqueFileName;
     }
 
+    // 법봉 환급
+    public boolean setHammerCharge(int hammer, TokenMemberInfo userInfo) {
+
+        Lawyer lawyer = lawyerRepository.findById(userInfo.getId()).orElseThrow();
+        if (lawyer.getHammer() < hammer) {
+            return false;
+        }
+
+        lawyer.setHammer(lawyer.getHammer() - hammer);
+        lawyerRepository.save(lawyer);
+        return true;
+    }
 }

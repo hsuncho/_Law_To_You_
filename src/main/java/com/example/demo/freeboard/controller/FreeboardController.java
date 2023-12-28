@@ -138,7 +138,6 @@ public class FreeboardController {
             BindingResult result
     ) {
 
-
         if(!freeboardService.userTrue(MemberInfo, requestDTO.getBno())) {
             return ResponseEntity.ok().body("이 글에 권한이 없습니다.");
         }
@@ -146,7 +145,6 @@ public class FreeboardController {
             log.info("/api/freeboard/update update 내용: {}", requestDTO);
             ResponseEntity<List<FieldError>> filedErrors = getValidatedResult(result);
             if (filedErrors != null) return filedErrors;
-            log.info("여긴 통과됨??");
 
             try {
                 List<String> uploadedFileList = new ArrayList<>();
@@ -163,9 +161,7 @@ public class FreeboardController {
                     });
                 }
 
-                log.info("uploadedFileList : {}", uploadedFileList);
                 FreeboardDetailResponseDTO responseDTO = freeboardService.modify(requestDTO, uploadedFileList);
-                log.info("responseDTO : {}", responseDTO);
                 return ResponseEntity.ok().body(responseDTO);
             } catch (Exception e) {
                 e.printStackTrace();

@@ -5,6 +5,7 @@ import lombok.*;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotEmpty;
 
 @Getter @Setter
 @EqualsAndHashCode @ToString
@@ -22,10 +23,20 @@ public class UserDetailResponseDTO {
     @NotBlank
     private String email;
 
+<<<<<<< HEAD
+    @NotEmpty
+    private int hammer;
+
+    public UserDetailResponseDTO(User user) {
+        this.id = user.getId();
+        this.nickname = user.getNickname();
+        this.email = user.getEmail();
+=======
     public UserDetailResponseDTO(User saved) {
         this.id = saved.getId();
         this.nickname = saved.getNickname();
         this.email = saved.getEmail();
+>>>>>>> 6cb878cdb58f44497aaa7be24b93759e3b081559
     }
 
 

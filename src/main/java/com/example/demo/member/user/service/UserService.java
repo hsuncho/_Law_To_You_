@@ -5,11 +5,9 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.example.demo.member.user.dto.request.NaverUserDTO;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
@@ -52,6 +50,11 @@ public class UserService {
     @Value("${kakao.client_secret}")
     private String KAKAO_CLIENT_SECRET;
 
+    @Value("${naver.client_id}")
+    private String NAVER_CLIENT_ID;
+
+    @Value("${naver.client_secret}")
+    private String NAVER_CLIENT_SECRET;
 
 
     public boolean isDuplicateId(String id) {
@@ -137,6 +140,110 @@ public class UserService {
         return new LoginResponseDTO(member, tokenDTO);
     }
 
+    // 네이버 로그인
+    public LoginResponseDTO naverService(String code, String state) {
+
+        Map<String, Object> responseData
+                = getNaverAccessToken(code, state);
+
+        String accessToken = (String) responseData.get("access_token");
+        String refreshToken = (String) responseData.get("refresh_token");
+
+        log.info("accessToken: {}", accessToken);
+        log.info("refreshToken: {}", refreshToken);
+
+        // 토큰을 통해 사용자 정보 가져오기
+        NaverUserDTO dto = getNaverUserInfo(accessToken);
+
+        if(!isDuplicateEmail(dto.getEmail())) {
+            userRepository.save(dto.toEntity(accessToken));
+        }
+        User foundUser = userRepository.findByEmail(dto.getEmail()).orElseThrow();
+
+        Member member = Member.builder()
+                .id(foundUser.getId())
+                .authority(foundUser.getAuthority())
+                .user(foundUser)
+                .build();
+
+        memberRepository.save(member);
+
+        TokenDTO tokenDTO = tokenProvider.createToken(member);// 토큰 발급
+
+        foundUser.setAccessToken(accessToken);
+        foundUser.setRefreshToken(refreshToken);
+        userRepository.save(foundUser);
+
+        return new LoginResponseDTO(member, tokenDTO);
+
+    }
+
+    private Map<String, Object> getNaverAccessToken(String code, String state) {
+
+        // 요청 uri
+        String requestUri = "https://nid.naver.com/oauth2.0/token";
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+
+        log.info("getNaverAccessToken   code: {}, state: {}", code, state);
+        // 요청 바디(파라미터) 설정
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        params.add("grant_type", "authorization_code");
+        params.add("client_id", NAVER_CLIENT_ID);
+        params.add("client_secret", NAVER_CLIENT_SECRET);
+        params.add("code", code);
+        params.add("state", state);
+
+        // 헤더와 바디 정보를 합치기 위해 HttpEntity 객체 생성
+        HttpEntity<Object> requestEntity = new HttpEntity<>(params, headers);
+
+        log.info("params: {}", params);
+        // 네이버 서버로 POST 통신
+        RestTemplate template = new RestTemplate();
+
+        try{
+        // 통신을 보내면서 응답데이터를 리턴
+//        ResponseEntity<Map> responseEntity
+//                = template.exchange(requestUri, HttpMethod.POST, requestEntity, Map.class);
+
+            ResponseEntity<Map> responseEntity = template.postForEntity(requestUri, requestEntity, Map.class);
+            log.info("url: {}", responseEntity);
+        // 응답 데이터에서 필요한 정보를 가져오기
+        Map<String, Object> responseData = (Map<String, Object>)responseEntity.getBody();
+        log.info("토큰 요청 응답 데이터: {}", responseData);
+
+        return responseData;
+        } catch (Exception e) {
+            log.error("액세스 토큰 요청 중 에러 발생", e);
+            return null;
+        }
+    }
+
+    private NaverUserDTO getNaverUserInfo(String accessToken) {
+        // 요청 uri
+        String requestUri = "https://openapi.naver.com/v1/nid/me";
+
+        // 요청 헤더 설정
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Authorization", "Bearer " + accessToken);
+
+        log.info("userInfo: {}", headers);
+        // 요청 보내기
+        RestTemplate template = new RestTemplate();
+        ResponseEntity<Map> responseEntity
+                = template.exchange(requestUri, HttpMethod.GET, new HttpEntity<>(headers), Map.class);
+
+        Map<String, Object> responseMap = (Map<String, Object>)responseEntity.getBody().get("response");
+        // 응답 바디 읽기
+        NaverUserDTO naverUserDTO = new NaverUserDTO();
+        naverUserDTO.setId((String)responseMap.get("id"));
+        naverUserDTO.setEmail((String)responseMap.get("email"));
+        naverUserDTO.setName((String)responseMap.get("name"));
+        log.info("user profile: {}", naverUserDTO);
+
+        return naverUserDTO;
+
+    }
 
     // 카카오 로그인
     public LoginResponseDTO kakaoService(String code) {
@@ -155,8 +262,7 @@ public class UserService {
         KakaoUserDTO dto = getKakaoUserInfo(accessToken);
 
         if(!isDuplicateEmail(dto.getKakaoAccount().getEmail())) {
-            User saved
-                    = userRepository.save(dto.toEntity(accessToken));
+            userRepository.save(dto.toEntity(accessToken));
         }
         User foundUser = userRepository.findByEmail(dto.getKakaoAccount().getEmail()).orElseThrow();
 
@@ -315,11 +421,103 @@ public class UserService {
             return responseData.getBody();
         }
 
+        // 네이버 로그아웃
+        if(member.getAuthority().equals("user") && member.getUser().getJoinMethod().equals("naver")) {
+            String reqUri = "https://nid.naver.com/oauth2.0/token";
+
+
+            MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+            params.add("grant_type", "delete");
+            params.add("client_id", NAVER_CLIENT_ID);
+            params.add("client_secret", NAVER_CLIENT_SECRET);
+            params.add("access_token", accessToken);
+            params.add("service_provider", "NAVER");
+
+            // 헤더와 바디 정보를 합치기 위해 HttpEntity 객체 생성
+            HttpEntity<Object> requestEntity = new HttpEntity<>(params);
+
+            log.info("logout: {}", requestEntity);
+
+            RestTemplate template = new RestTemplate();
+            ResponseEntity<String> responseData = template.postForEntity(reqUri, requestEntity, String.class);
+
+            return responseData.getBody();
+        }
+
         memberRepository.save(member);
 
         // 카카오 로그인을 한 사람이 아닐 경우
         return null;
     }
 
+<<<<<<< HEAD
+    // 법봉 충전
+    public void getHammerCharge(int hammer, TokenMemberInfo userInfo) {
 
+        User user = userRepository.findById(userInfo.getId()).orElseThrow();
+        user.setHammer(user.getHammer() + hammer);
+
+        userRepository.save(user);
+    }
+
+
+    public int hammerCnt(TokenMemberInfo userInfo) {
+
+        if(userRepository.findById(userInfo.getId()).isPresent()) {
+            return userRepository.findById(userInfo.getId()).orElseThrow().getHammer();
+        } else {
+            return lawyerRepository.findById(userInfo.getId()).orElseThrow().getHammer();
+        }
+    }
+
+
+    public Map<String, Object> updateNaverToken(String code, String state) {
+
+        Map<String, Object> responseData = getNaverAccessToken(code, state);
+        String refreshToken = (String) responseData.get("refresh_token");
+        String accessToken = (String) responseData.get("access_token");
+
+        String id = String.valueOf(getNaverUserInfo(accessToken).getId());
+        User foundUser = userRepository.findById(id).orElseThrow();
+
+        // 요청 uri
+        String requestUri = "https://nid.naver.com/oauth2.0/token";
+
+        // 요청 바디(파라미터) 설정
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        params.add("grant_type", "refresh_token");
+        params.add("client_id", NAVER_CLIENT_ID);
+        params.add("refresh_token", refreshToken);
+        params.add("client_secret", NAVER_CLIENT_SECRET); // 카카오 디벨로퍼 client secret(활성화 시 추가해 줘야 함)
+
+        // 헤더와 바디 정보를 합치기 위해 HttpEntity 객체 생성
+        HttpEntity<Object> requestEntity = new HttpEntity<>(params);
+
+        // 카카오 서버로 POST 통신
+        RestTemplate template = new RestTemplate();
+
+        // 통신을 보내면서 응답데이터를 리턴
+        ResponseEntity<Map> responseEntity
+                = template.exchange(requestUri, HttpMethod.POST, requestEntity, Map.class);
+
+        // 응답 데이터에서 필요한 정보를 가져오기
+        Map<String, Object> response = (Map<String, Object>)responseEntity.getBody();
+        log.info("토큰 갱신 요청 응답 데이터: {}", response);
+
+        // 액세스 토큰 갱신 및 저장
+        String newAccessToken = (String) response.get("access_token");
+        foundUser.setAccessToken(newAccessToken);
+        Member member = Member.builder()
+                .id(id)
+                .authority(foundUser.getAuthority())
+                .user(foundUser)
+                .build();
+
+        memberRepository.save(member);
+
+        return response;
+    }
+=======
+
+>>>>>>> 6cb878cdb58f44497aaa7be24b93759e3b081559
 }

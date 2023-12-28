@@ -25,6 +25,7 @@ public class FreeboardDetailResponseDTO {
     private String content;
     private List<String> routes;
 
+
     @JsonFormat(pattern = "yyyy/MM/dd") // 제이슨으로 가져올 때 이 타입으로 매핑해서 줌 이 라이브러리 사용
     private LocalDateTime regDate;
 

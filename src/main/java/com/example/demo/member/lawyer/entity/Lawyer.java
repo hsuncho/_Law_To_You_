@@ -76,4 +76,8 @@ public class Lawyer {
     public void setRefreshToken(String token) {
         this.refreshToken = token;
     }
+
+    public void setHammer(int hammer) {
+        this.hammer = hammer;
+    }
 }
