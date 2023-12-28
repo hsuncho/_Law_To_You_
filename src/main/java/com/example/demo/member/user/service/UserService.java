@@ -453,8 +453,10 @@ public class UserService {
 
     // 법봉 충전
     public void getHammerCharge(int hammer, TokenMemberInfo userInfo) {
+
         User user = userRepository.findById(userInfo.getId()).orElseThrow();
         user.setHammer(user.getHammer() + hammer);
+
         userRepository.save(user);
     }
 

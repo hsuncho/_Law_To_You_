@@ -50,7 +50,6 @@ public class FreeboardService {
     private final FreeboardFileRepository freeboardFileRepository;
     private final S3Service s3Service;
 
-
     public FreeListResponseDTO getFreeBoards(PageDTO dto) {
         Pageable pageable = PageRequest.of(
                 dto.getPage() - 1,
@@ -144,20 +143,16 @@ public class FreeboardService {
             freeboard.setContent(dto.getContent());
             freeboard.setRegDate(LocalDateTime.now());
 
-
             if (uploadedFileList != null) {
                 uploadedFileList.forEach(file -> {
                     FreeboardFile freeboardFile = new FreeboardFileDTO(file).toEntity(freeboard);
                     freeboardFileRepository.save(freeboardFile);
                 });
             }
-
             Freeboard saved = freeboardRepository.save(freeboard);
 
             log.info("게시글 수정 정상 작동! {}", saved);
             return new FreeboardDetailResponseDTO(saved);
-
-
     }
 
     // 게시글 작성자가 맞는지 여부 확인
@@ -172,7 +167,6 @@ public class FreeboardService {
             lawyer = lawyerRepository.findById(memberInfo.getId()).orElseThrow();
             return freeboardRepository.findByLawyerBoard(lawyer, bno);
         }
-
     }
 
     // 검색
@@ -213,27 +207,5 @@ public class FreeboardService {
 
         freeboardRepository.delete(freeboard);
 
-
     }
-
-
-    // s3 이미지 업로드
-//    public String uploadImage(MultipartFile uploadFile) throws IOException {
-//
-//        String uniqueFilename = UUID.randomUUID() + "_" + uploadFile.getOriginalFilename();
-//
-//        return s3Service.uploadToS3Bucket(uploadFile.getBytes(), uniqueFilename);
-//
-//    }
-//
-//    public List<FreeboardFile> findUploadPath(int bno) {
-//
-//        Freeboard freeboard = freeboardRepository.findById(bno).orElseThrow();
-//        return freeboard.getFreeboardFiles();
-//    }
-
-
-
-
-
 }

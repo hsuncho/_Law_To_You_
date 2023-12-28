@@ -31,8 +31,6 @@ public class MailSendService {
         }
     }
 
-
-
     public void makeRandomNumber() {
         Random r = new Random();
         String randomNumber = "";

@@ -87,7 +87,6 @@ public class MypageController {
     @PreAuthorize("hasRole('ROLE_user')")
     public ResponseEntity<?> getHammerCharge(@RequestParam int hammer,
                                           @AuthenticationPrincipal TokenMemberInfo userInfo) {
-
         userService.getHammerCharge(hammer, userInfo);
 
         return ResponseEntity.ok().body("법봉 "+ hammer + "개가 정상 충전되었습니다.");
@@ -101,7 +100,7 @@ public class MypageController {
                                              @AuthenticationPrincipal TokenMemberInfo userInfo) {
 
         if(lawyerService.setHammerCharge(hammer, userInfo)) { // true라면
-        return ResponseEntity.ok().body("법봉 " + hammer + "개가 정상 환급되었습니다.");
+        return ResponseEntity.ok().body("법봉 " + hammer + "개가 정상 환급 처리 되었습니다.");
         };
         return ResponseEntity.badRequest().body("법봉의 개수가 부족합니다.");
     }
@@ -114,6 +113,4 @@ public class MypageController {
 
         return ResponseEntity.ok().body("법봉의 개수는 " + hammerCnt + "개 입니다.");
     }
-
-
 }

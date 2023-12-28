@@ -79,10 +79,6 @@ public class FAQController {
                 qna.add(new FAQMiddleSecAndSubjectDTO(faq.getMiddleSection(), faq.getSubject()
                                                         , faq.getQuestion(), faq.getAnswer()));
             }
-
-
-
-
             return ResponseEntity.ok().body(new FAQListCountDTO(middleCount, qna));
         } catch (Exception e) {
             e.printStackTrace();
@@ -90,25 +86,4 @@ public class FAQController {
         }
 
     }
-
-//    // 특정 백문백답 클릭시 질문, 답변 출력
-//    @GetMapping("/{largeSection}/{middleSection}/{qno}")
-//    public ResponseEntity<?> FAQMiddleSectionQna(@PathVariable String largeSection, @PathVariable String middleSection,
-//                                                 @PathVariable int qno) {
-//        log.info("/api/faq/{}/{}/{} GET!", largeSection, middleSection, qno);
-//
-//        try{
-//            List<FAQ> qnaList = faqService.getMiddleANDQna(largeSection, middleSection, qno);
-//            List<QuestionAnswerDTO> qna = new ArrayList<>();
-//            for (FAQ f : qnaList) {
-//                qna.add(new QuestionAnswerDTO(f.getQuestion(), f.getAnswer()));
-//            }
-//            return ResponseEntity.ok().body(qna);
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//            return ResponseEntity.badRequest().body(e.getMessage());
-//        }
-//    }
-
-
 }

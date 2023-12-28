@@ -71,6 +71,7 @@ public class LawyerService {
 
     // 법봉 환급
     public boolean setHammerCharge(int hammer, TokenMemberInfo userInfo) {
+
         Lawyer lawyer = lawyerRepository.findById(userInfo.getId()).orElseThrow();
         if (lawyer.getHammer() < hammer) {
             return false;
