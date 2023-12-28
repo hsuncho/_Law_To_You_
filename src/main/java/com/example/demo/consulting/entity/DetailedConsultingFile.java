@@ -15,7 +15,7 @@ import java.beans.ExceptionListener;
 @AllArgsConstructor
 @Builder
 @Entity
-@Table(name = "detailedconsultingfile")
+@Table
 public class DetailedConsultingFile {
 
     @Id

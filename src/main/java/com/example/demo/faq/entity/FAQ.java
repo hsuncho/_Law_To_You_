@@ -16,7 +16,7 @@ import javax.persistence.Table;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "questionanswer")
+@Table(name = "question_answer")
 public class FAQ {
 
     @Id
