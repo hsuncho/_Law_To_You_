@@ -43,7 +43,7 @@ public class MailSendService {
 
     public String joinEmail(String email) {
         makeRandomNumber();
-        String setFrom = "kyy77321@naver.com";
+        String setFrom = "hsuncho@naver.com";
         String toMail = email;
         String title = "내 옆으Law 회원 가입 인증 이메일 입니다.";
         String content = "내 옆으Law를 방문해주셔서 감사힙니다." +

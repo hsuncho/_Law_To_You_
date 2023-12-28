@@ -43,7 +43,7 @@ public class User {
     private String accessToken;
 
     private String refreshToken;
-    
+
     // 온라인 상담 글
     @Builder.Default
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -68,7 +68,19 @@ public class User {
         this.accessToken = token;
     }
 
+<<<<<<< HEAD
     public void setHammer(int hammer) {
         this.hammer = hammer;
     }
 }
+=======
+    public void setNickname(String nickname) {
+        this.nickname = nickname;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+}
+>>>>>>> 6cb878cdb58f44497aaa7be24b93759e3b081559

@@ -92,14 +92,14 @@ public class UserService {
             HttpServletResponse response,
             final LoginRequestDTO dto
     ) {
-        
+
         // 아이디를 통해 회원 정보 조회
         Member member = memberRepository.findById(dto.getId()).orElseThrow(
                 () -> new RuntimeException("\n\n\n가입된 회원이 아닙니다.\n\n\n")
         );
 
         log.info("\n\n\n로그인 요청 한 회원: {}\n\n\n", member.getId());
-        
+
         // 비밀번호 얻기
         String password = null;
         if(member.getAuthority().equals("user")) {
@@ -275,7 +275,7 @@ public class UserService {
         memberRepository.save(member);
 
         TokenDTO tokenDTO = tokenProvider.createToken(member);// 토큰 발급
-        
+
         foundUser.setAccessToken(accessToken);
         foundUser.setRefreshToken(refreshToken);
         userRepository.save(foundUser);
@@ -448,9 +448,9 @@ public class UserService {
 
         // 카카오 로그인을 한 사람이 아닐 경우
         return null;
-
     }
 
+<<<<<<< HEAD
     // 법봉 충전
     public void getHammerCharge(int hammer, TokenMemberInfo userInfo) {
 
@@ -517,4 +517,7 @@ public class UserService {
 
         return response;
     }
+=======
+
+>>>>>>> 6cb878cdb58f44497aaa7be24b93759e3b081559
 }

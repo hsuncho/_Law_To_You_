@@ -41,7 +41,7 @@ public class WebSecurityConfig {
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .authorizeRequests()
-                .antMatchers("/api/user/logout").authenticated()
+                .antMatchers("/api/user/logout", "/api/counsel/**").authenticated()
                 .antMatchers("/", "/api/user/**", "/api/lawyer/**","/api/counsel/content/**", "/api/answer", "/api/faq/**").permitAll()
                 .anyRequest().authenticated();
 

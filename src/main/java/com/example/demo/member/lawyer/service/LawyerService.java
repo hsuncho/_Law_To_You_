@@ -53,7 +53,7 @@ public class LawyerService {
 
         return responseDTO;
     }
-    
+
     // 업로드된 파일을 서버에 저장하고 저장 경로를 리턴
     public String uploadAttachedFile(MultipartFile attachedFile) throws IOException {
 

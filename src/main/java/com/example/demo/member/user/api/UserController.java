@@ -51,8 +51,8 @@ public class UserController {
 
         return ResponseEntity.ok().body(resultFlag);
     }
-    
-    // 이메일 중복 확인 요청 처리(레거시 더 보기)
+
+    // 이메일 중복 확인 요청 처리
     @GetMapping("/email")
     public ResponseEntity<?> checkEmail(String email) {
         if(email.trim().isEmpty()) {
@@ -198,6 +198,18 @@ public class UserController {
 
         return ResponseEntity.ok().body(result);
     }
+<<<<<<< HEAD
+=======
+    
+    // 권한 확인
+    @GetMapping("/auth")
+    public ResponseEntity<?> getAuthority(@AuthenticationPrincipal TokenMemberInfo tokenMemberInfo) {
+        String authority = tokenMemberInfo.getAuthority();
+        return ResponseEntity.ok().body(authority);
+    }
+
+
+>>>>>>> 6cb878cdb58f44497aaa7be24b93759e3b081559
 }
 
 

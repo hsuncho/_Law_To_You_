@@ -1,9 +1,10 @@
 package com.example.demo.consulting.api;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
+import com.example.demo.answer.entity.Answer;
 import com.example.demo.consulting.repository.ConsultingRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -42,6 +43,7 @@ import lombok.extern.slf4j.Slf4j;
 @CrossOrigin
 public class ConsultingController {
 
+    private final ConsultingRepository consultingRepository;
     private final ConsultingService consultingService;
     private final S3Service s3Service;
 
@@ -61,7 +63,7 @@ public class ConsultingController {
         ConsultingListResponseDTO responseDTO = consultingService.getList(pageDTO);
         return ResponseEntity.ok().body(responseDTO);
     }
-    
+
     // 온라인 상담글 등록 요청
     @PostMapping("/register")
     @PreAuthorize("hasRole('ROLE_user')") // 사용자가 아니라면 인가처리 거부
@@ -133,12 +135,18 @@ public class ConsultingController {
     ) {
         log.info("/api/consulting/detail PUT!! - payload: {}", requestDTO);
 
-        if(!consultingService.validateDetailed(tokenMemberInfo, requestDTO.getConsultNum())) {
-            return ResponseEntity.badRequest().body("깊은 상담 등록에 관한 권한이 없습니다!");
-        }
-
         if(requestDTO == null) {
             return ResponseEntity.badRequest().body("등록 온라인 상담 정보를 전달해 주세요!");
+        }
+
+        Consulting consulting = consultingRepository.findById(requestDTO.getConsultNum()).orElseThrow();
+
+        if(!consulting.getUser().getId().equals(tokenMemberInfo.getId())) {
+            return ResponseEntity.badRequest().body("깊은 상담글 등록 권한이 없습니다.");
+        }
+
+        if(consulting.getUpdateTitle()!= null) {
+            return ResponseEntity.badRequest().body("깊은 상담글 등록은 최초 1회만 가능합니다.");
         }
 
         if(result.hasErrors()) {
@@ -191,5 +199,4 @@ public class ConsultingController {
     }
 
 
-
-    }
+}

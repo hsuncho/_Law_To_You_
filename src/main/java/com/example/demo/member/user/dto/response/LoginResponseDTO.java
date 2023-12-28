@@ -16,10 +16,19 @@ public class LoginResponseDTO {
 
     private String authority;
 
+    private String name;
+
     public LoginResponseDTO(Member member, TokenDTO tokenDTO) {
         this.id = member.getId();
         this.authority = member.getAuthority();
         this.accessToken = tokenDTO.getAccessToken();
+
+        if(member.getAuthority().equals("user")) {
+            this.name = member.getUser().getNickname();
+        } else if(member.getAuthority().equals("lawyer")) {
+            this.name = member.getLawyer().getName();
+        }
+
     }
 
 }
