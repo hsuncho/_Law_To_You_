@@ -22,10 +22,10 @@ public class UserDetailResponseDTO {
     @NotBlank
     private String email;
 
-    public UserDetailResponseDTO(User user) {
-        this.id = user.getId();
-        this.nickname = user.getNickname();
-        this.email = user.getEmail();
+    public UserDetailResponseDTO(User saved) {
+        this.id = saved.getId();
+        this.nickname = saved.getNickname();
+        this.email = saved.getEmail();
     }
 
 

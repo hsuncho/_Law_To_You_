@@ -2,6 +2,7 @@ package com.example.demo.member.lawyer.entity;
 
 import com.example.demo.answer.entity.Answer;
 import com.example.demo.freeboard.entity.Freeboard;
+import com.example.demo.member.Member;
 import com.example.demo.reply.entity.Reply;
 import lombok.*;
 
@@ -53,6 +54,7 @@ public class Lawyer {
     @Column(nullable = false)
     private String attachedFile;
 
+
     // 자유게시판 (freeboard)
     @OneToMany(mappedBy = "lawyer", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
@@ -66,6 +68,10 @@ public class Lawyer {
     // 답변(answer)
     @OneToMany(mappedBy = "lawyer", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Answer> answerList;
+
+    public void setLawyerPw(String password) {
+        this.lawyerPw = password;
+    }
 
     public void setRefreshToken(String token) {
         this.refreshToken = token;

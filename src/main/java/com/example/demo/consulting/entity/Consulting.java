@@ -50,12 +50,12 @@ public class Consulting {
     private String updateTitle;
 
     private String updateContent;
-    
+
     // 작성자 - 사용자 id 조회
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
-    
+
     // 답변
     @OneToMany(mappedBy = "consulting", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default

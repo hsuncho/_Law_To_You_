@@ -2,19 +2,19 @@ package com.example.demo.consulting.service;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import javax.persistence.EntityManager;
 
+import com.example.demo.answer.entity.Answer;
+import com.example.demo.answer.repository.AnswerRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -41,6 +41,7 @@ import com.example.demo.token.auth.TokenMemberInfo;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.reactive.function.client.WebClient;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
@@ -101,7 +102,7 @@ public class ConsultingService {
         return consultingRepository.findById(consultNum);
     }
 
-    public ConsultingDetailResponseDTO insert(ConsultingRegisterRequestDTO requestDTO, TokenMemberInfo tokenMemberInfo, List<String> uploadedFileList) throws Exception{
+    public ConsultingDetailResponseDTO insert(final ConsultingRegisterRequestDTO requestDTO, TokenMemberInfo tokenMemberInfo, final List<String> uploadedFileList) throws Exception{
 
         User user = userRepository.findById(tokenMemberInfo.getId()).orElseThrow();
         Consulting saved = consultingRepository.save(requestDTO.toEntity(user));
@@ -118,12 +119,15 @@ public class ConsultingService {
         em.flush();
         em.clear();
 
-//        saved.setConsultingFiles(consultingFileList);
-        Consulting foundConsulting
-                = consultingRepository.findById(saved.getConsultNum()).orElseThrow();
-        log.info("foundConsulting: {}", foundConsulting);
+        saved.setConsultingFiles(consultingFileList);
 
-        return new ConsultingDetailResponseDTO(foundConsulting);
+        consultingRepository.save(saved);
+//        Consulting foundConsulting
+//                = consultingRepository.findById(saved.getConsultNum()).orElseThrow();
+//        log.info("foundConsulting: {}", foundConsulting);
+
+//        return new ConsultingDetailResponseDTO(foundConsulting);
+        return new ConsultingDetailResponseDTO(saved);
     }
 
     /**
@@ -132,7 +136,7 @@ public class ConsultingService {
      * @return - 실제로 저장된 파일 경로
      */
 
-    public String uploadFiles(MultipartFile multipartFile) throws IOException {
+    public String uploadFiles(final MultipartFile multipartFile) throws IOException {
 
         String uniqueFileName = UUID.randomUUID() + "_" + multipartFile.getOriginalFilename();
         String uploadFile = s3Service.uploadToS3Bucket(multipartFile.getBytes(), uniqueFileName);
@@ -163,7 +167,7 @@ public class ConsultingService {
                 .toString();
     }
 
-    public UpdatedConsultingDetailResponseDTO registerDetailedConsulting(DetailedConsultingRegisterRequestDTO requestDTO, List<String> uploadedFileList) {
+    public UpdatedConsultingDetailResponseDTO registerDetailedConsulting(final DetailedConsultingRegisterRequestDTO requestDTO, final List<String> uploadedFileList) {
 
         Consulting consulting = consultingRepository.findById(requestDTO.getConsultNum()).orElseThrow();
         consulting.setUpdateTitle(requestDTO.getTitle());
@@ -199,25 +203,6 @@ public class ConsultingService {
 
     }
 
-    public Boolean validateDetailed(TokenMemberInfo tokenMemberInfo, int consultNum) {
-        // 변호사 계정 모두 인가처리 거부
-        if(tokenMemberInfo.getAuthority().equals("lawyer")) return false;
-        
-        // 깊은 상담 등록은 최초 1회만 가능
-        else if(!consultingRepository.findById(consultNum).orElseThrow()
-                .getUpdateDate().toString().isEmpty()) {
-            return false;
-            
-            // 요청 보낸 token의 정보와 온라인 상담 글을 작성했던 user가 동일인물인가
-        }  else if(tokenMemberInfo.getAuthority().equals("user")) {
-            return tokenMemberInfo.getId().equals(
-                    consultingRepository.findById(consultNum).orElseThrow()
-                            .getUser().getId()
-            );
-        }
-
-        return false;
 
 
-    }
 }

@@ -41,14 +41,8 @@ public class WebSecurityConfig {
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .authorizeRequests()
-                .antMatchers("/api/user/logout").authenticated()
-<<<<<<< HEAD
-                .antMatchers("/", "/api/user/**", "/api/lawyer/**","/api/counsel/content/**", "/api/answer").permitAll()
-//                .antMatchers("/api/user/logout").authenticated()
-                .antMatchers("/api/faq/**", "/", "/api/user/**", "/api/lawyer/**", "*/verifyIamport/**").permitAll()
-=======
+                .antMatchers("/api/user/logout", "/api/counsel/**").authenticated()
                 .antMatchers("/", "/api/user/**", "/api/lawyer/**","/api/counsel/content/**", "/api/answer", "/api/faq/**").permitAll()
->>>>>>> 358c9e4e6c03ceb0d7af698e525e10bead74336b
                 .anyRequest().authenticated();
 
         // 토큰 인증 필터 연결

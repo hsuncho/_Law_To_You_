@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 @Builder
 public class ConsultingDetailResponseDTO {
 
+    private int consultNum;
     private String title;
     private String writer;
     private String content;
@@ -27,6 +28,7 @@ public class ConsultingDetailResponseDTO {
 
     public ConsultingDetailResponseDTO(Consulting saved) {
 
+            this.consultNum = saved.getConsultNum();
             this.regDate = saved.getRegDate();
             this.title = saved.getTitle();
             this.writer = saved.getWriter();

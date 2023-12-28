@@ -133,7 +133,7 @@ public class AnswerController {
         try {
             List<String> uploadedFileList = new ArrayList<>();
             multipartFiles.forEach( multipartFile -> {
-                
+
                 // 깊은 답변 첨부파일
                 if(multipartFile != null) {
                     log.info("answer file name: {}", multipartFile.getOriginalFilename());
