@@ -7,19 +7,22 @@ import com.example.demo.member.lawyer.dto.request.LawyerJoinRequestDTO;
 import com.example.demo.member.lawyer.dto.response.LawyerJoinResponseDTO;
 import com.example.demo.member.lawyer.entity.Lawyer;
 import com.example.demo.member.lawyer.repository.LawyerRepository;
-import com.example.demo.member.user.service.UserService;
+import com.example.demo.member.master.dto.response.lawyerListResponseDTO;
 import com.example.demo.token.auth.TokenMemberInfo;
 import com.example.demo.token.auth.TokenProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -80,5 +83,28 @@ public class LawyerService {
         lawyer.setHammer(lawyer.getHammer() - hammer);
         lawyerRepository.save(lawyer);
         return true;
+    }
+
+    public List<lawyerListResponseDTO> getlawyerList() {
+
+        List<Lawyer> lawyer = lawyerRepository.findAll();
+        List<lawyerListResponseDTO> lawyerListResponseDTOList = new ArrayList<>();
+        for (Lawyer law : lawyer) {
+            lawyerListResponseDTOList.add(new lawyerListResponseDTO(law));
+        };
+
+        log.info("lawyerList: {}", lawyerListResponseDTOList);
+
+        return lawyerListResponseDTOList;
+    }
+
+    // 변호사 자격증 url 불러오기
+    public String getLawyerImg(String lawyerId) {
+
+        String lawyerImgUrl = lawyerRepository.findById(lawyerId).orElseThrow().getAttachedFile();
+//        String fileUrlName = lawyerImgUrl.substring(lawyerImgUrl.lastIndexOf("/") + 1);
+        String encodedFileName = URLDecoder.decode(lawyerImgUrl, StandardCharsets.UTF_8);
+
+        return encodedFileName;
     }
 }

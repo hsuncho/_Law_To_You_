@@ -27,7 +27,6 @@ public class Master {
     @Builder.Default
     private String authority = "master";
 
-    private String accessToken;
 
 
 

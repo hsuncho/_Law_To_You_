@@ -78,6 +78,4 @@ public class FAQRepositoryImpl implements FAQRepositoryCustom {
                         .and(fAQ.middleSection.trim().startsWith(middleSection)))
                 .fetchFirst());
     }
-
-
 }

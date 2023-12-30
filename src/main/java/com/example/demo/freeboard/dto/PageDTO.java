@@ -5,6 +5,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import org.springframework.boot.context.properties.bind.DefaultValue;
 
 @Getter
 @Setter
@@ -13,8 +14,9 @@ import lombok.ToString;
 @Builder
 public class PageDTO {
 
-    private int page;
-    private int size;
+
+    private int page = 1;
+    private int size = 10;
 
     public PageDTO(int page, int size) {
         this.page = page;

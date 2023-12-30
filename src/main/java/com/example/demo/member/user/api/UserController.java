@@ -226,7 +226,6 @@ public class UserController {
         String authority = tokenMemberInfo.getAuthority();
         return ResponseEntity.ok().body(authority);
     }
-
 }
 
 

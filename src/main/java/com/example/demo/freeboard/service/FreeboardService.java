@@ -151,8 +151,8 @@ public class FreeboardService {
     // 검색
     public List<Freeboard> search(String search, boolean flag) {
         return freeboardRepository.findByContent(search, flag);
-
     }
+
     // 검색시 게시물 수
     public int searchCNT(String search, boolean flag) {
         return freeboardRepository.findByContentCNT(search, flag);

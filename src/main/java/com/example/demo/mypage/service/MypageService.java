@@ -228,8 +228,6 @@ public class MypageService {
 
     }
 
-
-
 }
 
 
