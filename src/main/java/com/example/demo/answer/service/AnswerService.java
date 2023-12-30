@@ -79,7 +79,6 @@ public class AnswerService {
 
         return AnswerListResponseDTO.builder()
                 .count(detailList.size())
-                .pageInfo(new PageResponseDTO(answers))
                 .answerList(detailList)
                 .build();
     }

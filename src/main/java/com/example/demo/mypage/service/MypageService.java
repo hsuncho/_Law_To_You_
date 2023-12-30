@@ -25,7 +25,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.security.core.parameters.P;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -104,32 +103,31 @@ public class MypageService {
         return "회원 탈퇴되었습니다.";
     }
 
-    public FreeListResponseDTO getList(PageDTO pageDTO, TokenMemberInfo tokenMemberInfo) {
+    public MyPageFreeListResponseDTO getList(TokenMemberInfo tokenMemberInfo) {
 
-        // offset = (현재 페이지번호 - 1) * 페이지당 요청하는 자료 개수
-        Pageable pageable = PageRequest.of(
-                pageDTO.getPage() - 1,
-                pageDTO.getSize(),
-                Sort.by("regDate").descending()
-        );
+        List<MyPageFreeboardDetailDTO> list = new ArrayList<>();
+        List<Freeboard> freeList = new ArrayList<>();
 
-        Page<Freeboard> freeboards = freeboardRepository.findAll(pageable);
-        List<Freeboard> contentList = freeboards.getContent();
+        if(tokenMemberInfo.getAuthority().equals("user")) {
+             freeList = freeboardRepository.findAllByUser(
+                    userRepository.findById(tokenMemberInfo.getId()).orElseThrow()
+            );
+        } else if(tokenMemberInfo.getAuthority().equals("lawyer")) {
+            freeList = freeboardRepository.findAllByLawyer(
+                    lawyerRepository.findById(tokenMemberInfo.getId()).orElseThrow()
+            );
+        }
 
-        List<FreeboardDetailResponseDTO> detailList = contentList.stream()
-                .filter(freeboard -> {
-                    return  (tokenMemberInfo.getAuthority().equals("user")) ?
-                            (freeboard.getUser().equals(userRepository.findById(tokenMemberInfo.getId()).orElseThrow()))
-                            : (freeboard.getLawyer().equals(lawyerRepository.findById(tokenMemberInfo.getId()).orElseThrow()));
-                })
-                .map(FreeboardDetailResponseDTO::new)
-                .collect(Collectors.toList());
+        for(Freeboard freeboard : freeList ) {
+            MyPageFreeboardDetailDTO detailDTO = new MyPageFreeboardDetailDTO(freeboard);
+            list.add(detailDTO);
+        }
 
-        return FreeListResponseDTO.builder()
-                .count(detailList.size())
-                .pageInfo(new PageResponseDTO(freeboards))
-                .freeboards(detailList)
+        return MyPageFreeListResponseDTO.builder()
+                .count(list.size())
+                .freeboardList(list)
                 .build();
+
     }
 
     public UserConsultingListResponseDTO getConsultingList(PageDTO pageDTO, TokenMemberInfo tokenMemberInfo) {
@@ -152,7 +150,6 @@ public class MypageService {
 
         return UserConsultingListResponseDTO.builder()
                 .count(detailList.size())
-                .pageInfo(new PageResponseDTO(consultings))
                 .consultingList(detailList)
                 .build();
     }
@@ -231,10 +228,8 @@ public class MypageService {
 
     }
 
-    public void hammerCharge(int hammer, TokenMemberInfo userInfo) {
 
 
-    }
 }
 
 

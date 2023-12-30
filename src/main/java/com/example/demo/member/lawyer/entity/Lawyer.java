@@ -80,4 +80,6 @@ public class Lawyer {
     public void setHammer(int hammer) {
         this.hammer = hammer;
     }
+
+    public void setApproval() { this.approval = true;}
 }
