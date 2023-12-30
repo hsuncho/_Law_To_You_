@@ -450,7 +450,7 @@ public class UserService {
         return null;
     }
 
-<<<<<<< HEAD
+
     // 법봉 충전
     public void getHammerCharge(int hammer, TokenMemberInfo userInfo) {
 
@@ -517,7 +517,4 @@ public class UserService {
 
         return response;
     }
-=======
-
->>>>>>> 6cb878cdb58f44497aaa7be24b93759e3b081559
 }

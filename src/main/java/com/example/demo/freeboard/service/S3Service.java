@@ -10,10 +10,12 @@ import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
+import software.amazon.awssdk.services.s3.model.GetUrlRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.model.S3Exception;
 
 import javax.annotation.PostConstruct;
+import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -63,11 +65,21 @@ public class S3Service {
         // 오브젝트를 버킷에 업로드(위에서 생성한 오브젝트, 업로드 하고자 하는 파일(바이트 배열)
         s3.putObject(request, RequestBody.fromBytes(uploadFile));
 
-
         return uploadFileName(fileName);
+    }
 
+    // s3에 저장된 이미지의 url을 생성
+    public URL getURL(String attachedFile) {
+
+        log.info("attachedFile: {}", attachedFile);
+        return s3.utilities().getUrl(GetUrlRequest.builder()
+                        .bucket(bucketName)
+                        .key(attachedFile)
+                        .build());
 
     }
+
+
 
     // 업로드 된 파일의 url을 반환
     public String uploadFileName(String fileName) {

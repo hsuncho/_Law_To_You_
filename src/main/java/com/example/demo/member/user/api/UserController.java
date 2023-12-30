@@ -198,8 +198,6 @@ public class UserController {
 
         return ResponseEntity.ok().body(result);
     }
-<<<<<<< HEAD
-=======
     
     // 권한 확인
     @GetMapping("/auth")
@@ -207,9 +205,6 @@ public class UserController {
         String authority = tokenMemberInfo.getAuthority();
         return ResponseEntity.ok().body(authority);
     }
-
-
->>>>>>> 6cb878cdb58f44497aaa7be24b93759e3b081559
 }
 
 

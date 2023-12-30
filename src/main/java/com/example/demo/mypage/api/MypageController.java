@@ -170,7 +170,7 @@ public class MypageController {
 
         int hammerCnt = userService.hammerCnt(userInfo);
 
-        return ResponseEntity.ok().body("법봉의 개수는 " + hammerCnt + "개 입니다.");
+        return ResponseEntity.ok().body(hammerCnt);
     }
 
     // 사용자가 등록한 온라인 상담 내역 목록

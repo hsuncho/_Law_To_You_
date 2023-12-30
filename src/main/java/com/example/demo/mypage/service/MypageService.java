@@ -230,11 +230,6 @@ public class MypageService {
         return false;
 
     }
-
-    public void hammerCharge(int hammer, TokenMemberInfo userInfo) {
-
-
-    }
 }
 
 
