@@ -68,12 +68,10 @@ public class User {
         this.accessToken = token;
     }
 
-<<<<<<< HEAD
     public void setHammer(int hammer) {
         this.hammer = hammer;
     }
-}
-=======
+
     public void setNickname(String nickname) {
         this.nickname = nickname;
     }
@@ -81,6 +79,4 @@ public class User {
     public void setPassword(String password) {
         this.password = password;
     }
-
 }
->>>>>>> 6cb878cdb58f44497aaa7be24b93759e3b081559

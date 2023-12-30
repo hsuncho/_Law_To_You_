@@ -49,7 +49,7 @@ public class FreeboardController {
     public ResponseEntity<?> writeFreeboard(
             @Validated @RequestPart(value = "freeboard") FreeboardCreateRequestDTO requestDTO,
             @AuthenticationPrincipal TokenMemberInfo userInfo,
-            @RequestPart(value = "attchedFile", required = false) List<MultipartFile> multipartFiles,
+            @RequestPart(value = "attachedFile", required = false) List<MultipartFile> multipartFiles,
             BindingResult result
     ) {
 
@@ -186,7 +186,6 @@ public class FreeboardController {
                 return ResponseEntity.internalServerError()
                         .body(e.getMessage());
             }
-
     }
 
     private static ResponseEntity<List<FieldError>> getValidatedResult(BindingResult result) {

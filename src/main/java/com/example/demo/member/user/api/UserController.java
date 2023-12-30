@@ -1,5 +1,8 @@
 package com.example.demo.member.user.api;
 
+import com.example.demo.member.lawyer.repository.LawyerRepository;
+import com.example.demo.member.master.entity.Master;
+import com.example.demo.member.master.repository.MasterRepository;
 import com.example.demo.member.user.dto.request.LoginRequestDTO;
 import com.example.demo.member.user.dto.request.UserJoinRequestDTO;
 import com.example.demo.member.user.dto.response.LoginResponseDTO;
@@ -30,6 +33,8 @@ import java.util.UUID;
 public class UserController {
 
     private final UserService userService;
+    private final MasterRepository masterRepository;
+    private final LawyerRepository lawyerRepository;
 
 
     @GetMapping("/test")
@@ -126,8 +131,24 @@ public class UserController {
     ) {
         try{
             log.info("dto: {}", dto);
+
+            if(masterRepository.findById(dto.getId()).isPresent()
+                    && masterRepository.findById(dto.getId()).orElseThrow()
+                    .getMasterPw().equals(dto.getPassword())) {
+                return ResponseEntity.ok()
+                        .body(
+                                LoginResponseDTO.builder()
+                                        .id(dto.getId())
+                                        .authority("master")
+                                        .build());
+            }
+
             LoginResponseDTO responseDTO
                     = userService.authenticate(response, dto);
+
+            if(responseDTO.getAuthority().equals("notApproval")) {
+                return ResponseEntity.badRequest().body("승인된 변호사 회원만 로그인이 가능합니다.");
+            }
 
             return  ResponseEntity.ok().body(responseDTO);
 
@@ -198,8 +219,6 @@ public class UserController {
 
         return ResponseEntity.ok().body(result);
     }
-<<<<<<< HEAD
-=======
     
     // 권한 확인
     @GetMapping("/auth")
@@ -208,8 +227,6 @@ public class UserController {
         return ResponseEntity.ok().body(authority);
     }
 
-
->>>>>>> 6cb878cdb58f44497aaa7be24b93759e3b081559
 }
 
 

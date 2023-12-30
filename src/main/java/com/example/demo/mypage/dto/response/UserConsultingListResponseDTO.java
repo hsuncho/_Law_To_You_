@@ -12,6 +12,5 @@ import java.util.List;
 public class UserConsultingListResponseDTO {
 
     private int count;
-    private PageResponseDTO pageInfo;
     private List<UserConsultingDetailDTO> consultingList;
 }

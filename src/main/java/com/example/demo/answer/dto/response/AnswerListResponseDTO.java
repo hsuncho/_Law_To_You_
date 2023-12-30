@@ -12,7 +12,6 @@ import java.util.List;
 public class AnswerListResponseDTO {
 
     private int count; // 총 답변 개수
-    private PageResponseDTO pageInfo;
     private List<AnswerDetailResponseDTO> answerList;
 
 }
