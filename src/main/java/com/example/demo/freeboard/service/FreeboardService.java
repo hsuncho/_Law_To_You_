@@ -73,20 +73,6 @@ public class FreeboardService {
                 .build();
     }
 
-    public FreeListResponseDTO retrieve(String userId) {
-        User user = getUser(userId);
-
-        List<Freeboard> entityList = freeboardRepository.findAllByUser(user);
-
-        List<FreeboardDetailResponseDTO> dtoList = entityList.stream()
-                .map(FreeboardDetailResponseDTO::new)
-                .collect(Collectors.toList());
-
-        return FreeListResponseDTO.builder()
-                .freeboards(dtoList)
-                .build();
-    }
-
     public FreeboardCreateResponseDTO create(
             final FreeboardCreateRequestDTO requestDTO,
              final TokenMemberInfo userInfo,
@@ -114,13 +100,6 @@ public class FreeboardService {
         freeboard.setFreeboardFiles(freeboardList);
 
         return new FreeboardCreateResponseDTO(freeboard);
-    }
-
-    private User getUser(String userId) {
-        User user = userRepository.findById(userId).orElseThrow(
-                () -> new RuntimeException("회원 정보가 없습니다.")
-        );
-        return user;
     }
 
     @Transactional

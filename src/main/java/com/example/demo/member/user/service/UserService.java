@@ -1,10 +1,14 @@
 package com.example.demo.member.user.service;
 
 import java.util.Map;
+import java.util.Optional;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.example.demo.member.lawyer.entity.Lawyer;
+import com.example.demo.member.master.entity.Master;
+import com.example.demo.member.master.repository.MasterRepository;
 import com.example.demo.member.user.dto.request.NaverUserDTO;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
@@ -42,6 +46,7 @@ public class UserService {
     private final TokenProvider tokenProvider;
     private final PasswordEncoder passwordEncoder;
     private final MemberRepository memberRepository;
+    private final MasterRepository masterRepository;
 
     @Value("${kakao.client_id}")
     private String KAKAO_CLIENT_ID;
@@ -59,7 +64,7 @@ public class UserService {
 
     public boolean isDuplicateId(String id) {
 
-        return userRepository.existsById(id) || lawyerRepository.existsById(id);
+        return userRepository.existsById(id) || lawyerRepository.existsById(id) || !id.equals("#master");
     }
 
     public boolean isDuplicateEmail(String email) {
@@ -88,11 +93,11 @@ public class UserService {
         return responseDTO;
     }
 
+    // 로그인
     public LoginResponseDTO authenticate(
             HttpServletResponse response,
             final LoginRequestDTO dto
     ) {
-
         // 아이디를 통해 회원 정보 조회
         Member member = memberRepository.findById(dto.getId()).orElseThrow(
                 () -> new RuntimeException("\n\n\n가입된 회원이 아닙니다.\n\n\n")
@@ -117,6 +122,9 @@ public class UserService {
             throw new RuntimeException("비밀번호가 틀렸습니다.");
         }
 
+        if(!authenticateLawyer(member))
+            return LoginResponseDTO.builder().authority("notApproval").build();
+
         // 아이디와 비밀번호가 일치할 경우 로그인 성공
         log.info("{}님 로그인 성공!", member.getId());
 
@@ -138,6 +146,16 @@ public class UserService {
         log.info("\n\n\nResponse에 헤더 추가됨 - {}\n\n\n", response.getHeader("Authorization"));
 
         return new LoginResponseDTO(member, tokenDTO);
+    }
+
+    private boolean authenticateLawyer(Member member) {
+
+        Optional<Lawyer> byId = lawyerRepository.findById(member.getId());
+
+        if(byId.isPresent()) {
+                return byId.orElseThrow().isApproval();
+        }
+        return true;
     }
 
     // 네이버 로그인
@@ -450,7 +468,6 @@ public class UserService {
         return null;
     }
 
-
     // 법봉 충전
     public void getHammerCharge(int hammer, TokenMemberInfo userInfo) {
 
@@ -517,4 +534,5 @@ public class UserService {
 
         return response;
     }
+
 }

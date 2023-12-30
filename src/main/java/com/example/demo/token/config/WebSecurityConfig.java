@@ -42,7 +42,7 @@ public class WebSecurityConfig {
                 .and()
                 .authorizeRequests()
                 .antMatchers("/api/user/logout", "/api/counsel/**").authenticated()
-                .antMatchers("/", "/api/user/**", "/api/lawyer/**","/api/counsel/content/**", "/api/answer", "/api/faq/**", "/api/master/**").permitAll()
+                .antMatchers("/", "/api/user/**", "/api/lawyer/**", "/api/faq/**", "/api/master/**").permitAll()
                 .anyRequest().authenticated();
 
         // 토큰 인증 필터 연결

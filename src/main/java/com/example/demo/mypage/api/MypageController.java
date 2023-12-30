@@ -1,13 +1,10 @@
 package com.example.demo.mypage.api;
 
 import com.example.demo.member.lawyer.service.LawyerService;
-import com.example.demo.member.user.entity.User;
-import com.example.demo.answer.dto.response.DetailedResponseDTO;
 import com.example.demo.answer.entity.Answer;
 import com.example.demo.consulting.entity.Consulting;
 import com.example.demo.consulting.repository.ConsultingRepository;
 import com.example.demo.freeboard.dto.PageDTO;
-import com.example.demo.freeboard.dto.response.FreeListResponseDTO;
 import com.example.demo.member.user.service.UserService;
 import com.example.demo.mypage.dto.request.LawyerUpdateRequestDTO;
 import com.example.demo.mypage.dto.request.UserUpdateRequestDTO;
@@ -16,7 +13,6 @@ import com.example.demo.mypage.service.MypageService;
 import com.example.demo.token.auth.TokenMemberInfo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -26,7 +22,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static com.example.demo.consulting.entity.QConsulting.consulting;
 
 
 @RestController
@@ -131,13 +126,11 @@ public class MypageController {
     }
 
     // 자유게시판 글 목록
-    @GetMapping("/api/mypage/list")
+    @GetMapping("/list")
     public ResponseEntity<?> getList(
-            @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "10") int size,
             @AuthenticationPrincipal TokenMemberInfo tokenMemberInfo
     ) {
-        FreeListResponseDTO responseDTO = mypageService.getList(new PageDTO(page, size), tokenMemberInfo);
+        MyPageFreeListResponseDTO responseDTO = mypageService.getList(tokenMemberInfo);
         return ResponseEntity.ok().body(responseDTO);
     }
     

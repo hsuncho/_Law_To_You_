@@ -30,5 +30,6 @@ public class UserDetailResponseDTO {
         this.id = user.getId();
         this.nickname = user.getNickname();
         this.email = user.getEmail();
+
     }
 }

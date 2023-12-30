@@ -44,6 +44,7 @@ public class FreeboardDetailResponseDTO {
 
     // 검색시
     public FreeboardDetailResponseDTO(String bool, Freeboard freeboard) {
+        
         this.title = freeboard.getTitle();
         this.writer = freeboard.getWriter();
         this.regDate = freeboard.getRegDate();
