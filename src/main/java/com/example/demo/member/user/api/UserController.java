@@ -9,6 +9,7 @@ import com.example.demo.member.user.dto.response.LoginResponseDTO;
 import com.example.demo.member.user.dto.response.UserJoinResponseDTO;
 import com.example.demo.member.user.service.UserService;
 import com.example.demo.token.auth.TokenMemberInfo;
+import com.example.demo.token.dto.TokenDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -18,11 +19,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.security.SecureRandom;
-import java.util.Arrays;
 import java.util.Map;
-import java.util.Random;
-import java.util.UUID;
 
 
 @RestController
@@ -43,12 +40,13 @@ public class UserController {
 
     // 아이디 중복 확인 요청 처리
     @GetMapping("/checkId")
-    public ResponseEntity<?> check(String id) {
-        if(id.trim().isEmpty()) {
+    public ResponseEntity<?> check(@RequestParam String id) {
+        if (id.trim().isEmpty()) {
             return ResponseEntity.badRequest().body("작성된 아이디가 없습니다!");
         }
 
-       boolean resultFlag = userService.isDuplicateId(id);
+
+        boolean resultFlag = userService.isDuplicateId(id);
         log.info("{} 중복 ? - {}", id, resultFlag);
 
         return ResponseEntity.ok().body(resultFlag);
@@ -56,8 +54,8 @@ public class UserController {
 
     // 이메일 중복 확인 요청 처리
     @GetMapping("/email")
-    public ResponseEntity<?> checkEmail(String email) {
-        if(email.trim().isEmpty()) {
+    public ResponseEntity<?> checkEmail(@RequestParam String email) {
+        if (email.trim().isEmpty()) {
             return ResponseEntity.badRequest().body("작성된 이메일이 없습니다!");
         }
 
@@ -69,8 +67,8 @@ public class UserController {
 
     // 닉네임 중복 확인
     @GetMapping("/checkName")
-    public ResponseEntity<?> checkName(String nickname) {
-        if(nickname.trim().isEmpty()) {
+    public ResponseEntity<?> checkName(@RequestParam String nickname) {
+        if (nickname.trim().isEmpty()) {
             return ResponseEntity.badRequest().body("작성된 닉네임이 없습니다!");
         }
 
@@ -92,19 +90,19 @@ public class UserController {
         String email = dto.getEmail();
         String nickname = dto.getNickname();
 
-        if(userService.isDuplicateId(id)) {
+        if (userService.isDuplicateId(id)) {
             return ResponseEntity.badRequest().body("아이디가 중복되었습니다.");
         }
 
-        if(userService.isDuplicateEmail(email)) {
+        if (userService.isDuplicateEmail(email)) {
             return ResponseEntity.badRequest().body("이메일이 중복되었습니다.");
         }
 
-        if(userService.isDuplicateNickname(nickname)) {
+        if (userService.isDuplicateNickname(nickname)) {
             return ResponseEntity.badRequest().body("닉네임이 중복되었습니다.");
         }
 
-        if(result.hasErrors()) {
+        if (result.hasErrors()) {
             log.warn(result.toString());
             return ResponseEntity.badRequest()
                     .body(result.getFieldError());
@@ -124,12 +122,12 @@ public class UserController {
     @PostMapping("/login")
     public ResponseEntity<?> loginUser(
             HttpServletResponse response,
-           @RequestBody LoginRequestDTO dto
+            @RequestBody LoginRequestDTO dto
     ) {
-        try{
+        try {
             log.info("dto: {}", dto);
 
-            if(masterRepository.findById(dto.getId()).isPresent()
+            if (masterRepository.findById(dto.getId()).isPresent()
                     && masterRepository.findById(dto.getId()).orElseThrow()
                     .getMasterPw().equals(dto.getPassword())) {
                 return ResponseEntity.ok()
@@ -143,11 +141,11 @@ public class UserController {
             LoginResponseDTO responseDTO
                     = userService.authenticate(response, dto);
 
-            if(responseDTO.getAuthority().equals("notApproval")) {
+            if (responseDTO.getAuthority().equals("notApproval")) {
                 return ResponseEntity.badRequest().body("승인된 변호사 회원만 로그인이 가능합니다.");
             }
 
-            return  ResponseEntity.ok().body(responseDTO);
+            return ResponseEntity.ok().body(responseDTO);
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -158,7 +156,7 @@ public class UserController {
 
     // 카카오 로그인
     @GetMapping("/kakaoLogin")
-    public ResponseEntity<?> kakaoLogin(String code) {
+    public ResponseEntity<?> kakaoLogin(@RequestParam String code) {
         log.info("/api/user/kakaoLogin - GET! -code: {}", code);
         LoginResponseDTO responseDTO = userService.kakaoService(code);
 
@@ -166,9 +164,9 @@ public class UserController {
     }
 
 
-     //카카오 토큰 갱신 API
+    //카카오 토큰 갱신 API
     @GetMapping("/kakao")
-    public ResponseEntity<?> updateKakaoToken(String code) {
+    public ResponseEntity<?> updateKakaoToken(@RequestParam String code) {
         Map<String, Object> responseData = userService.updateKakaoToken(code);
         return ResponseEntity.ok().body(responseData);
     }
@@ -216,7 +214,7 @@ public class UserController {
 
         return ResponseEntity.ok().body(result);
     }
-    
+
     // 권한 확인
     @GetMapping("/auth")
     public ResponseEntity<?> getAuthority(@AuthenticationPrincipal TokenMemberInfo tokenMemberInfo) {
@@ -224,7 +222,6 @@ public class UserController {
         return ResponseEntity.ok().body(authority);
     }
 }
-
 
 
 

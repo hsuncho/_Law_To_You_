@@ -33,7 +33,6 @@ public class LawyerService {
     private final LawyerRepository lawyerRepository;
     private final PasswordEncoder passwordEncoder;
     private final MemberRepository memberRepository;
-    private final TokenProvider tokenProvider;
 
 
     // 회원가입(변호사)

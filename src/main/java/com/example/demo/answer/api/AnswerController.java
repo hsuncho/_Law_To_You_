@@ -52,7 +52,10 @@ public class AnswerController {
 
     //짧은 답변 목록 요청(해당 상담 글 작성자 + 모든 변호사)
     @GetMapping
-    public ResponseEntity<?> getList(int consultNum, PageDTO pageDTO, @AuthenticationPrincipal TokenMemberInfo tokenMemberInfo) {
+    public ResponseEntity<?> getList(@RequestParam int consultNum, @RequestParam int page, @RequestParam int size, @AuthenticationPrincipal TokenMemberInfo tokenMemberInfo) {
+
+        PageDTO pageDTO = new PageDTO(page, size);
+
         log.info("/api/counsel?page={}&size={}", pageDTO.getPage(), pageDTO.getSize());
 
         if(!consultingService.validateWriter(tokenMemberInfo, consultNum)) {
@@ -89,7 +92,7 @@ public class AnswerController {
     // 답변 채택 (사용자)
     @PutMapping("/adopt")
     @PreAuthorize("hasRole('ROLE_user')") // 사용자가 아니라면 인가처리 거부
-    public ResponseEntity<?> adoptAnswer(int answerNum, @AuthenticationPrincipal TokenMemberInfo tokenMemberInfo) {
+    public ResponseEntity<?> adoptAnswer(@RequestParam int answerNum, @AuthenticationPrincipal TokenMemberInfo tokenMemberInfo) {
 
         if(!answerService.validateForAdopt(tokenMemberInfo, answerNum)) {
             return ResponseEntity.badRequest().body("답변 채택에 대한 요청이 승인되지 않았습니다.");
@@ -162,7 +165,7 @@ public class AnswerController {
 
     // 깊은 답변 상세보기 요청
     @GetMapping("/detail")
-    public ResponseEntity<?> getDetailedAns(int answerNum, @AuthenticationPrincipal TokenMemberInfo tokenMemberInfo) {
+    public ResponseEntity<?> getDetailedAns(@RequestParam int answerNum, @AuthenticationPrincipal TokenMemberInfo tokenMemberInfo) {
         log.info("/api/answer/detial/{} GET", answerNum);
 
         // 깊은 상담 작성자 + 깊은 답변 변호사가 아닐 경우 인가처리 거부하는 메서드

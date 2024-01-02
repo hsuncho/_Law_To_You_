@@ -31,6 +31,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -64,12 +65,19 @@ public class MypageService {
 
     public UserDetailResponseDTO updateUser(final UserUpdateRequestDTO requestDTO, TokenMemberInfo tokenMemberInfo) {
 
-        String encoded = passwordEncoder.encode(requestDTO.getPassword());
-        requestDTO.setPassword(encoded);
-
         User foundUser = userRepository.findById(tokenMemberInfo.getId()).orElseThrow();
-        foundUser.setPassword(requestDTO.getPassword());
-        foundUser.setNickname(requestDTO.getNickname());
+
+        if(!requestDTO.getNickname().isEmpty()) {
+            foundUser.setNickname(requestDTO.getNickname());
+        }
+
+        if(!requestDTO.getPassword().isEmpty()) {
+            String encoded = passwordEncoder.encode(requestDTO.getPassword());
+            requestDTO.setPassword(encoded);
+
+            foundUser.setPassword(requestDTO.getPassword());
+        }
+
         User saved = userRepository.save(foundUser);
         log.info("\n\n\n사용자 회원 정보 수정 정상 수행됨! - updated user - {}", saved);
 
@@ -78,11 +86,15 @@ public class MypageService {
 
     public LawyerDetailResponseDTO updateLawyer(final LawyerUpdateRequestDTO requestDTO, TokenMemberInfo tokenMemberInfo) {
 
-        String encoded = passwordEncoder.encode(requestDTO.getPassword());
-        requestDTO.setPassword(encoded);
-
         Lawyer foundLawyer = lawyerRepository.findById(tokenMemberInfo.getId()).orElseThrow();
-        foundLawyer.setLawyerPw(requestDTO.getPassword());
+
+        if(!requestDTO.getPassword().isEmpty()){
+            String encoded = passwordEncoder.encode(requestDTO.getPassword());
+            requestDTO.setPassword(encoded);
+
+            foundLawyer.setLawyerPw(requestDTO.getPassword());
+        }
+
         Lawyer saved = lawyerRepository.save(foundLawyer);
         log.info("\n\n\n변호사 회원 정보 수정 정상 수행됨! - updated lawyer - {}", saved);
 

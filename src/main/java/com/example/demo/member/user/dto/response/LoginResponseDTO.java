@@ -14,6 +14,8 @@ public class LoginResponseDTO {
 
     private String accessToken;
 
+    private String refreshToken;
+
     private String authority;
 
     private String name;
@@ -22,6 +24,7 @@ public class LoginResponseDTO {
         this.id = member.getId();
         this.authority = member.getAuthority();
         this.accessToken = tokenDTO.getAccessToken();
+        this.refreshToken = tokenDTO.getRefreshToken();
 
         if(member.getAuthority().equals("user")) {
             this.name = member.getUser().getNickname();

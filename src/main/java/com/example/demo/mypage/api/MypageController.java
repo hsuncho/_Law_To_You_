@@ -219,7 +219,7 @@ public class MypageController {
         Consulting consulting = consultingRepository.findById(consultNum).orElseThrow();
 
         if(!mypageService.validateDetailed(tokenMemberInfo, consultNum)) {
-            return ResponseEntity.badRequest().body("잘못된 권한 요청입니다.");
+            return ResponseEntity.badRequest().body("authority-problem");
         }
 
         // 깊은 상담 등록 페이지로 이동하기 위해 온라인 상담 제목, 내용, 첨부파일, 게시일 반환
@@ -227,13 +227,13 @@ public class MypageController {
         List<Answer> answerList = consulting.getAnswerList();
 
         if(answerList.isEmpty()) {
-            return ResponseEntity.badRequest().body("작성된 답변이 없어 깊은 상담글 등록이 불가능합니다.");
+            return ResponseEntity.badRequest().body("no-short-answers");
         }
 
         List<Integer> adoptList = answerList.stream().map(Answer::getAdopt).collect(Collectors.toList());
 
         if(!adoptList.contains(1)) {
-            return ResponseEntity.badRequest().body("답변을 채택하셔야 깊은 상담글 등록이 가능합니다.");
+            return ResponseEntity.badRequest().body("no-adopted-answer");
         }
             MyPageDetailResponseDTO responseDTO = mypageService.getDetailedConsulting(consultNum);
 
