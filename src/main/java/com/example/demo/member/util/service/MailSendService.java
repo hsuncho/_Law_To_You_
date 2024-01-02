@@ -1,6 +1,8 @@
 package com.example.demo.member.util.service;
 
 import com.example.demo.member.util.RedisUtil;
+import lombok.extern.java.Log;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -13,6 +15,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Random;
 
 @Service
+@Slf4j
 public class MailSendService {
 
     @Autowired
@@ -43,7 +46,7 @@ public class MailSendService {
 
     public String joinEmail(String email) {
         makeRandomNumber();
-        String setFrom = "hsuncho@naver.com";
+        String setFrom = "kyy77321@naver.com";
         String toMail = email;
         String title = "내 옆으Law 회원 가입 인증 이메일 입니다.";
         String content = "내 옆으Law를 방문해주셔서 감사힙니다." +
@@ -53,6 +56,7 @@ public class MailSendService {
                         "인증번호를 제대로 입력해주세요";
 
         mailSend(setFrom, toMail, title, content);
+        log.info("mailSend 보냄 {}", setFrom);
         return Integer.toString(authNumber);
     }
 
@@ -64,11 +68,12 @@ public class MailSendService {
             helper.setTo(toMail);
             helper.setSubject(title);
             helper.setText(content,true);
+            log.info("mailSend {}", helper);
             mailSender.send(message);
         } catch (MessagingException e) {
             e.printStackTrace();
         }
-        redisUtil.setDataExpire(Integer.toString(authNumber), toMail, 60*5L);
+        redisUtil.setDataExpire(Integer.toString(authNumber), toMail, 60*5L); // 5분
     }
 
 }

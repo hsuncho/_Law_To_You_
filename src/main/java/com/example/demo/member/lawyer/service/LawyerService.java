@@ -35,8 +35,6 @@ public class LawyerService {
     private final MemberRepository memberRepository;
     private final TokenProvider tokenProvider;
 
-    @Value("${upload.path}")
-    private String uploadRootPath;
 
     // 회원가입(변호사)
     public LawyerJoinResponseDTO createLawyer(
@@ -57,20 +55,6 @@ public class LawyerService {
         return responseDTO;
     }
 
-    // 업로드된 파일을 서버에 저장하고 저장 경로를 리턴
-    public String uploadAttachedFile(MultipartFile attachedFile) throws IOException {
-
-        File rootDir = new File(uploadRootPath);
-        if(!rootDir.exists()) rootDir.mkdirs();
-
-        String uniqueFileName
-                = UUID.randomUUID() + "_" + attachedFile.getOriginalFilename();
-
-        File uploadFile = new File(uploadRootPath + "/" + uniqueFileName);
-        attachedFile.transferTo(uploadFile);
-
-        return uniqueFileName;
-    }
 
     // 법봉 환급
     public boolean setHammerCharge(int hammer, TokenMemberInfo userInfo) {

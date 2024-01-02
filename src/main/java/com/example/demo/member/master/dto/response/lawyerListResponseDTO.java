@@ -18,12 +18,14 @@ public class lawyerListResponseDTO {
     private String name;
     private int lawyerNum;
     private boolean approval;
+    private String attachedFile;
 
     public lawyerListResponseDTO(Lawyer lawyer) {
         this.lawyerId = lawyer.getLawyerId();
         this.name = lawyer.getName();
         this.lawyerNum = lawyer.getLawyerNum();
         this.approval = lawyer.isApproval();
+        this.attachedFile = lawyer.getAttachedFile();
     }
 
 

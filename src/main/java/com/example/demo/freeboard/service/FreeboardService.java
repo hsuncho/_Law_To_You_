@@ -63,7 +63,7 @@ public class FreeboardService {
 
         List<FreeboardDetailResponseDTO> detailList
                 = freeList.stream()
-                .map(freeboard -> new FreeboardDetailResponseDTO("전체 요청",freeboard))
+                .map(freeboard -> new FreeboardDetailResponseDTO("전체 요청", freeboard))
                 .collect(Collectors.toList());
 
         return FreeListResponseDTO.builder()
@@ -162,14 +162,6 @@ public class FreeboardService {
         return freeboardRepository.findById(bno);
     }
 
-    public String uploadFiles(MultipartFile multipartFile) throws IOException {
-
-        String uniqueFilename = UUID.randomUUID() + "_" + multipartFile.getOriginalFilename();
-        String uploadFile = s3Service.uploadToS3Bucket(multipartFile.getBytes(), uniqueFilename); // 파일을 바이트로 변환후 집어넣기
-
-        return uploadFile;
-
-    }
 
     public void delete(int bno) {
         Freeboard freeboard = freeboardRepository.findById(bno).orElseThrow();
