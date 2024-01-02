@@ -13,13 +13,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.example.demo.consulting.dto.request.ConsultingRegisterRequestDTO;
@@ -58,7 +52,8 @@ public class ConsultingController {
     // 온라인 상담글 목록 요청
     @GetMapping
     @PreAuthorize("hasRole('ROLE_lawyer')") // 변호사가 아니라면 인가 처리 거부
-    public ResponseEntity<?> getList(PageDTO pageDTO) {
+    public ResponseEntity<?> getList(@RequestParam int page, @RequestParam int size) {
+        PageDTO pageDTO = new PageDTO(page, size);
         log.info("/api/counsel?page={}&size={}", pageDTO.getPage(), pageDTO.getSize());
         ConsultingListResponseDTO responseDTO = consultingService.getList(pageDTO);
         return ResponseEntity.ok().body(responseDTO);
@@ -109,7 +104,7 @@ public class ConsultingController {
 
     // 온라인 상담글 상세 보기 요청 (해당 글 작성 사용자 + 모든 변호사)
     @GetMapping("/content")
-    public ResponseEntity<?> getContent(@AuthenticationPrincipal TokenMemberInfo tokenMemberInfo, int consultNum) {
+    public ResponseEntity<?> getContent(@AuthenticationPrincipal TokenMemberInfo tokenMemberInfo, @RequestParam int consultNum) {
         log.info("/api/counsel/content/{} GET", consultNum);
 
         log.info("controller - tokenMemberInfo - {}", tokenMemberInfo);
@@ -136,17 +131,17 @@ public class ConsultingController {
         log.info("/api/consulting/detail PUT!! - payload: {}", requestDTO);
 
         if(requestDTO == null) {
-            return ResponseEntity.badRequest().body("등록 온라인 상담 정보를 전달해 주세요!");
+            return ResponseEntity.badRequest().body("no-request-info");
         }
 
         Consulting consulting = consultingRepository.findById(requestDTO.getConsultNum()).orElseThrow();
 
         if(!consulting.getUser().getId().equals(tokenMemberInfo.getId())) {
-            return ResponseEntity.badRequest().body("깊은 상담글 등록 권한이 없습니다.");
+            return ResponseEntity.badRequest().body("no-authority");
         }
 
         if(consulting.getUpdateTitle()!= null) {
-            return ResponseEntity.badRequest().body("깊은 상담글 등록은 최초 1회만 가능합니다.");
+            return ResponseEntity.badRequest().body("already-registered");
         }
 
         if(result.hasErrors()) {
@@ -179,7 +174,7 @@ public class ConsultingController {
                     .body("온라인 상담 글 생성 중 에러가 발생했습니다.");
         } catch (Exception e) {
             e.printStackTrace();
-            return ResponseEntity.badRequest().body("기타 예외가 발생했습니다.");
+            return ResponseEntity.badRequest().body("etc-error");
         }
 
     }

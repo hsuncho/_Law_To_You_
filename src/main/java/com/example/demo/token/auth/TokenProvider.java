@@ -51,7 +51,7 @@ public class TokenProvider {
 //            Instant.now().plus(2, ChronoUnit.WEEKS)
             Instant.now().plus(336, ChronoUnit.HOURS)
     );
-    
+
     // TokenDTO를 생성하는 메서드
     public TokenDTO createToken(Member member) {
 
@@ -121,11 +121,11 @@ public class TokenProvider {
                 .authority(claims.get("authority", String.class))
                 .build();
     }
-    
+
     // refresh token 검증
     // DB에 저장되어 있는 token과 비교
     public String validateRefreshToken(String token) {
-        
+
         try {
             // 1차 토큰 검증
             if(validateToken(token) == null) return null;
@@ -150,7 +150,7 @@ public class TokenProvider {
                 log.info("\n\n\n 갱신된 accessToken - {}", recreationAccessToken(claims.get("sub").toString(), claims.get("authority")));
                 return recreationAccessToken(claims.get("sub").toString(), claims.get("authority"));
             }
-            
+
         } catch (Exception e) {
             // refresh token 만료된 경우 로그인 필요
             return null;

@@ -16,7 +16,7 @@ public class MasterController {
 
     private final MasterService masterService;
 
-    @GetMapping("/history")
+    @PutMapping("/history")
     public ResponseEntity<?> approveLawyer(
             @RequestParam String authority,
             @RequestParam String lawyerId

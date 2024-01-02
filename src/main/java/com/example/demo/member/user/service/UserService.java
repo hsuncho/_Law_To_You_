@@ -1,5 +1,6 @@
 package com.example.demo.member.user.service;
 
+import java.util.Date;
 import java.util.Map;
 import java.util.Optional;
 
@@ -7,9 +8,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.example.demo.member.lawyer.entity.Lawyer;
-import com.example.demo.member.master.entity.Master;
 import com.example.demo.member.master.repository.MasterRepository;
 import com.example.demo.member.user.dto.request.NaverUserDTO;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -34,6 +37,8 @@ import com.example.demo.token.dto.TokenDTO;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import static javax.crypto.Cipher.SECRET_KEY;
 
 
 @Service
@@ -64,7 +69,7 @@ public class UserService {
 
     public boolean isDuplicateId(String id) {
 
-        return userRepository.existsById(id) || lawyerRepository.existsById(id) || !id.equals("#master");
+        return userRepository.existsById(id) || lawyerRepository.existsById(id) || id.equals("#master");
     }
 
     public boolean isDuplicateEmail(String email) {
@@ -534,5 +539,6 @@ public class UserService {
 
         return response;
     }
+
 
 }

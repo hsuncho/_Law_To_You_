@@ -116,7 +116,7 @@ public class FreeboardController {
 
     // 게시글 상세 글 요청
     @GetMapping("/content")
-    public ResponseEntity<?> detailedFreeboard(int bno,
+    public ResponseEntity<?> detailedFreeboard(@RequestParam int bno,
                                                @AuthenticationPrincipal TokenMemberInfo MemberInfo) {
         log.info("/api/freeboard/{} GET", bno);
             Freeboard dto = freeboardService.getDetail(bno).orElseThrow();
