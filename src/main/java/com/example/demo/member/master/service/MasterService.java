@@ -16,16 +16,13 @@ import org.springframework.transaction.annotation.Transactional;
 public class MasterService {
 
     private final LawyerRepository lawyerRepository;
-    private final MasterRepository masterRepository;
-    public ApproveLawyerResponseDTO approve(String lawyerId) {
+
+    public void approval(String lawyerId) {
 
         Lawyer lawyer = lawyerRepository.findById(lawyerId).orElseThrow();
         if(!lawyer.isApproval()) {
             lawyer.setApproval();
         }
-
-        Lawyer saved = lawyerRepository.save(lawyer);
-        return new ApproveLawyerResponseDTO(saved);
+            lawyerRepository.save(lawyer);
     }
-
 }

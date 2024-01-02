@@ -66,7 +66,6 @@ public class UserService {
     @Value("${naver.client_secret}")
     private String NAVER_CLIENT_SECRET;
 
-
     public boolean isDuplicateId(String id) {
 
         return userRepository.existsById(id) || lawyerRepository.existsById(id) || id.equals("#master");

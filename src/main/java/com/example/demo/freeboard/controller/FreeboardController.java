@@ -9,6 +9,7 @@ import com.example.demo.freeboard.dto.response.FreeboardDetailResponseDTO;
 import com.example.demo.freeboard.dto.response.FreeboardDetaileResponseCountDTO;
 import com.example.demo.freeboard.entity.Freeboard;
 import com.example.demo.freeboard.service.FreeboardService;
+import com.example.demo.freeboard.service.S3Service;
 import com.example.demo.token.auth.TokenMemberInfo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,6 +25,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 @RestController
 @Slf4j
@@ -33,6 +35,7 @@ import java.util.List;
 public class FreeboardController {
 
     private final FreeboardService freeboardService;
+    private final S3Service s3Service;
 
     // 자유게시판 클릭시 글번호, 제목, 작성자, 작성일자, 리스트 요청
     @GetMapping
@@ -60,20 +63,24 @@ public class FreeboardController {
                     .body(result.getFieldError());
         }
 
+        log.info("multipartFile try실행 전 : {}size, {}", multipartFiles.size(),multipartFiles);
         try {
-            List<String> uploadedFileList = new ArrayList<>();
+            AtomicReference<List<String>> uploadedFileList = new AtomicReference<>(new ArrayList<>());
             multipartFiles.forEach(multipartFile -> {
                 if(multipartFile != null) {
                     log.info("attached file name: {}", multipartFile.getOriginalFilename());
                     try {
-                        uploadedFileList.add(freeboardService.uploadFiles(multipartFile));
+                        log.info("multipartFile: {}", multipartFile.getOriginalFilename());
+                        uploadedFileList.get().add(s3Service.uploadFiles(multipartFile));
                     } catch (IOException e) {
                         throw new RuntimeException(e);
                     }
+                } else {
+                    uploadedFileList.set(new ArrayList<>());
                 }
             });
 
-            FreeboardCreateResponseDTO responseDTO = freeboardService.create(requestDTO, userInfo, uploadedFileList);
+            FreeboardCreateResponseDTO responseDTO = freeboardService.create(requestDTO, userInfo, uploadedFileList.get());
             return ResponseEntity.ok().body(responseDTO);
         } catch (RuntimeException e) {
             e.printStackTrace();
@@ -153,7 +160,7 @@ public class FreeboardController {
                         if (multipartFile != null && !multipartFile.isEmpty()) {
                             log.info("attached file name: {}", multipartFile.getOriginalFilename());
                             try {
-                                uploadedFileList.add(freeboardService.uploadFiles(multipartFile));
+                                uploadedFileList.add(s3Service.uploadFiles(multipartFile));
                             } catch (IOException e) {
                                 throw new RuntimeException(e);
                             }
@@ -173,7 +180,7 @@ public class FreeboardController {
 
     // 게시글 삭제 요청
     @DeleteMapping("/delete")
-    public ResponseEntity<?> freeboardDelete(int bno,
+    public ResponseEntity<?> freeboardDelete(@RequestParam int bno,
                                              @AuthenticationPrincipal TokenMemberInfo userInfo) {
         if(!freeboardService.userTrue(userInfo, bno)) {
             return ResponseEntity.ok().body("이 글에 권한이 없습니다.");

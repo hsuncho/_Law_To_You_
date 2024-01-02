@@ -20,6 +20,7 @@ public class FreeboardDetailResponseDTO {
 
     // 자유게시판 클릭시 글번호, 제목, 작성자, 작성일자, 리스트 요청
     private int TrueFalse;
+    private int bno;
     private String title;
     private String writer;
     private String content;
@@ -44,7 +45,7 @@ public class FreeboardDetailResponseDTO {
 
     // 검색시
     public FreeboardDetailResponseDTO(String bool, Freeboard freeboard) {
-        
+        this.bno = freeboard.getBno();
         this.title = freeboard.getTitle();
         this.writer = freeboard.getWriter();
         this.regDate = freeboard.getRegDate();

@@ -4,19 +4,24 @@ package com.example.demo.freeboard.service;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
+import software.amazon.awssdk.services.s3.model.GetUrlRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.model.S3Exception;
 
 import javax.annotation.PostConstruct;
+import java.io.IOException;
+import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @Slf4j
@@ -63,10 +68,7 @@ public class S3Service {
         // 오브젝트를 버킷에 업로드(위에서 생성한 오브젝트, 업로드 하고자 하는 파일(바이트 배열)
         s3.putObject(request, RequestBody.fromBytes(uploadFile));
 
-
         return uploadFileName(fileName);
-
-
     }
 
     // 업로드 된 파일의 url을 반환
@@ -89,7 +91,6 @@ public class S3Service {
                      .key(encodedFileName)
                      .build();
 
-
              log.info("File delete Success!! {}", encodedFileName);
              s3.deleteObject(deleteObjectRequest);
          });
@@ -99,5 +100,11 @@ public class S3Service {
         }
     }
 
+    public String uploadFiles(MultipartFile multipartFile) throws IOException {
 
+        String uniqueFilename = UUID.randomUUID() + "_" + multipartFile.getOriginalFilename();
+        String uploadFile = uploadToS3Bucket(multipartFile.getBytes(), uniqueFilename); // 파일을 바이트로 변환후 집어넣기
+
+        return uploadFile;
+    }
 }

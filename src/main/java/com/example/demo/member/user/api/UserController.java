@@ -33,12 +33,10 @@ public class UserController {
     private final MasterRepository masterRepository;
     private final LawyerRepository lawyerRepository;
 
-
     @GetMapping("/test")
     public String test() {
         return "test 작동된단다";
     }
-
 
     // 아이디 중복 확인 요청 처리
     @GetMapping("/checkId")

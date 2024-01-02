@@ -32,6 +32,4 @@ public class UserDetailResponseDTO {
         this.email = user.getEmail();
 
     }
-
-
 }

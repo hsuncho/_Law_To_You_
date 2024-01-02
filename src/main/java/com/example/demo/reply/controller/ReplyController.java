@@ -37,7 +37,7 @@ public class ReplyController {
 
     // 댓글 목록 불러오기
     @GetMapping("/list")
-    public ResponseEntity<?> getList(PageDTO pageDTO , @RequestParam int bno,
+    public ResponseEntity<?> getList(@RequestParam PageDTO pageDTO , @RequestParam int bno,
                                      @AuthenticationPrincipal TokenMemberInfo userInfo) {
         log.info("/api/reply?page={}&size={}", pageDTO.getPage(), pageDTO.getSize());
         ReplyListResponseDTO responseDTO = replyService.getList(pageDTO, bno, userInfo);
