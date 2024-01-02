@@ -1,5 +1,6 @@
 package com.example.demo.member.lawyer.api;
 
+import com.example.demo.freeboard.service.S3Service;
 import com.example.demo.member.lawyer.dto.response.LawyerJoinResponseDTO;
 import com.example.demo.member.lawyer.service.LawyerService;
 import com.example.demo.member.lawyer.dto.request.LawyerJoinRequestDTO;
@@ -22,6 +23,7 @@ public class LawyerController {
 
     private final LawyerService lawyerService;
     private final UserService userService;
+    private final S3Service s3Service;
 
     // 아이디와 이메일 중복 확인 요청 처리는 /api/user로 진행됨
 
@@ -67,8 +69,7 @@ public class LawyerController {
                 if (attachedFile != null) {
                     log.info("attached file name: {}", attachedFile.getOriginalFilename());
 
-                    // 전달 받은 이미지를 먼저 지정된 경로에 저장한 후 DB 저장을 위해 경로 받아옴
-                    uploadedFilePath = lawyerService.uploadAttachedFile(attachedFile);
+                    uploadedFilePath = s3Service.uploadFiles(attachedFile);
                 }
 
                 LawyerJoinResponseDTO responseDTO = lawyerService.createLawyer(dto, uploadedFilePath);

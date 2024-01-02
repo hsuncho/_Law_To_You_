@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 @Builder
 public class FreeboardCreateResponseDTO {
 
+    private int bno;
     private String title;
     private String writer;
     private String content;
@@ -28,6 +29,7 @@ public class FreeboardCreateResponseDTO {
     private LocalDateTime updateDate;
 
     public FreeboardCreateResponseDTO(Freeboard saved) {
+        this.bno = saved.getBno();
         this.title = saved.getTitle();
         this.content = saved.getContent();
         this.writer = saved.getWriter();

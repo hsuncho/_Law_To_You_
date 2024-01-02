@@ -36,12 +36,10 @@ public class UserController {
     private final MasterRepository masterRepository;
     private final LawyerRepository lawyerRepository;
 
-
     @GetMapping("/test")
     public String test() {
         return "test 작동된단다";
     }
-
 
     // 아이디 중복 확인 요청 처리
     @GetMapping("/checkId")
@@ -49,7 +47,6 @@ public class UserController {
         if(id.trim().isEmpty()) {
             return ResponseEntity.badRequest().body("작성된 아이디가 없습니다!");
         }
-
 
        boolean resultFlag = userService.isDuplicateId(id);
         log.info("{} 중복 ? - {}", id, resultFlag);

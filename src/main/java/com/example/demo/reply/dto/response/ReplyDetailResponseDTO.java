@@ -15,6 +15,8 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 public class ReplyDetailResponseDTO {
+
+    private int rno;
     private String lawyerId;
     private String userId;
     private String content;
@@ -31,6 +33,7 @@ public class ReplyDetailResponseDTO {
         if (saved.getUser() != null) {
             this.userId = saved.getUser().getId();
         }
+        this.rno = saved.getRno();
         this.content = saved.getContent();
         this.writer = saved.getWriter();
         this.regDate = saved.getRegDate();
