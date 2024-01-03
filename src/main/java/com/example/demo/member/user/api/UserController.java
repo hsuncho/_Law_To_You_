@@ -1,7 +1,7 @@
 package com.example.demo.member.user.api;
 
+import com.example.demo.member.MemberRepository;
 import com.example.demo.member.lawyer.repository.LawyerRepository;
-import com.example.demo.member.master.entity.Master;
 import com.example.demo.member.master.repository.MasterRepository;
 import com.example.demo.member.user.dto.request.LoginRequestDTO;
 import com.example.demo.member.user.dto.request.UserJoinRequestDTO;
@@ -9,9 +9,9 @@ import com.example.demo.member.user.dto.response.LoginResponseDTO;
 import com.example.demo.member.user.dto.response.UserJoinResponseDTO;
 import com.example.demo.member.user.service.UserService;
 import com.example.demo.token.auth.TokenMemberInfo;
-import com.example.demo.token.dto.TokenDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.BindingResult;
@@ -32,6 +32,7 @@ public class UserController {
     private final UserService userService;
     private final MasterRepository masterRepository;
     private final LawyerRepository lawyerRepository;
+    private final MemberRepository memberRepository;
 
     @GetMapping("/test")
     public String test() {
@@ -128,6 +129,7 @@ public class UserController {
             log.info("dto: {}", dto);
 
             if (masterRepository.findById(dto.getId()).isPresent()
+                    && dto.getReqAuthority().equals("user")
                     && masterRepository.findById(dto.getId()).orElseThrow()
                     .getMasterPw().equals(dto.getPassword())) {
                 return ResponseEntity.ok()
@@ -141,9 +143,13 @@ public class UserController {
             LoginResponseDTO responseDTO
                     = userService.authenticate(response, dto);
 
-            if (responseDTO.getAuthority().equals("notApproval")) {
-                return ResponseEntity.badRequest().body("승인된 변호사 회원만 로그인이 가능합니다.");
+            if(!userService.validateReqLogin(dto)) {
+                return ResponseEntity.badRequest().body("bad-request-authority");
             }
+
+//            if (responseDTO.getAuthority().equals("notApproval")) {
+//                return ResponseEntity.badRequest().body("not-approval-lawyer");
+//            }
 
             return ResponseEntity.ok().body(responseDTO);
 
@@ -210,9 +216,9 @@ public class UserController {
         // 엑세스 만료 후 로그아웃
         log.info("/api/user/logout - GET! - member: {}", memberInfo.getId());
 
-        String result = userService.logout(request, memberInfo);
+        userService.logout(request, memberInfo);
 
-        return ResponseEntity.ok().body(result);
+        return ResponseEntity.ok().build();
     }
 
     // 권한 확인

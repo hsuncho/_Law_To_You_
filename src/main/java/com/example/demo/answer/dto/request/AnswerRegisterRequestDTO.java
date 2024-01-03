@@ -13,6 +13,8 @@ import javax.validation.constraints.NotBlank;
 @Builder
 public class AnswerRegisterRequestDTO {
 
+    int consultNum;
+
     @NotBlank
     private String shortAns;
 

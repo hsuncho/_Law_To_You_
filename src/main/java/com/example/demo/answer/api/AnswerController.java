@@ -4,6 +4,7 @@ import com.example.demo.answer.dto.request.DetailedRegisterRequestDTO;
 import com.example.demo.answer.dto.response.DetailedResponseDTO;
 import com.example.demo.answer.entity.Answer;
 import com.example.demo.answer.repository.AnswerRepository;
+import com.example.demo.consulting.repository.ConsultingRepository;
 import com.example.demo.consulting.service.ConsultingService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -70,12 +71,11 @@ public class AnswerController {
     @PostMapping("/register")
     @PreAuthorize("hasRole('ROLE_lawyer')") // 변호사가 아니라면 인가처리 거부
     public ResponseEntity<?> registerShortAns(
-            int consultNum,
-            @Validated @RequestPart("answer") AnswerRegisterRequestDTO requestDTO,
+            @Validated @RequestBody AnswerRegisterRequestDTO requestDTO,
             @AuthenticationPrincipal TokenMemberInfo tokenMemberInfo,
             BindingResult result
     ){
-        if(!answerService.validateForRegister(tokenMemberInfo, consultNum)) {
+        if(!answerService.validateForRegister(tokenMemberInfo, requestDTO.getConsultNum())) {
             return ResponseEntity.badRequest().body("하나의 온라인 상담 글에는 하나의 답변만 작성 가능합니다.");
         }
 
@@ -85,7 +85,7 @@ public class AnswerController {
                     .badRequest()
                     .body(result.getFieldError());
         }
-        AnswerDetailResponseDTO responseDTO = answerService.insert(consultNum, requestDTO, tokenMemberInfo);
+        AnswerDetailResponseDTO responseDTO = answerService.insert(requestDTO, tokenMemberInfo);
         return ResponseEntity.ok().body(responseDTO);
     }
 
@@ -165,15 +165,14 @@ public class AnswerController {
 
     // 깊은 답변 상세보기 요청
     @GetMapping("/detail")
-    public ResponseEntity<?> getDetailedAns(@RequestParam int answerNum, @AuthenticationPrincipal TokenMemberInfo tokenMemberInfo) {
-        log.info("/api/answer/detial/{} GET", answerNum);
+    public ResponseEntity<?> getDetailedAns(@RequestParam int consultNum, @AuthenticationPrincipal TokenMemberInfo tokenMemberInfo) {
+        log.info("/api/answer/detial/{} GET", consultNum);
 
         // 깊은 상담 작성자 + 깊은 답변 변호사가 아닐 경우 인가처리 거부하는 메서드
-        if(!answerService.validateForDetail(tokenMemberInfo, answerNum)) {
-            return ResponseEntity.badRequest().body("잘못된 권한 요청입니다.");
-        };
-
-       Answer answer = answerService.getDetail(answerNum);
+        if(!answerService.validateForDetail(tokenMemberInfo, consultNum)) {
+            return ResponseEntity.badRequest().body("wrong-authority-request");
+        }
+       Answer answer = answerService.getDetail(consultNum, tokenMemberInfo);
 
        return ResponseEntity.ok().body(new DetailedResponseDTO(answer));
     }
