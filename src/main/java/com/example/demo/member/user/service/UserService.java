@@ -429,7 +429,7 @@ public class UserService {
         RestTemplate template = new RestTemplate();
 
         // 카카오 로그아웃
-        if(member.getAuthority().equals("user")) {
+        if(member.getUser().getAuthority().equals("user") && member.getUser().getJoinMethod().equals("kakao")) {
             String reqUri = "https://kapi.kakao.com/v1/user/logout";
             HttpHeaders headers = new HttpHeaders();
             headers.add("Authorization", "Bearer " + accessToken);
@@ -440,7 +440,7 @@ public class UserService {
             return responseData.getBody();
         }
 
-        if(member.getUser().getJoinMethod().equals("naver")) {
+        if(member.getUser().getAuthority().equals("user") && member.getUser().getJoinMethod().equals("naver")) {
             String reqUri = "https://nid.naver.com/oauth2.0/token";
 
             MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
