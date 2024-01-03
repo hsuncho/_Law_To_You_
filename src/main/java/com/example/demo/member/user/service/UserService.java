@@ -104,7 +104,7 @@ public class UserService {
     ) {
         // 아이디를 통해 회원 정보 조회
         Member member = memberRepository.findById(dto.getId()).orElseThrow(
-                () -> new RuntimeException("\n\n\n가입된 회원이 아닙니다.\n\n\n")
+                        () -> new RuntimeException("no-account")
         );
 
         log.info("\n\n\n로그인 요청 한 회원: {}\n\n\n", member.getId());
@@ -123,11 +123,8 @@ public class UserService {
         String encodedPassword = password; // DB에 저장된 암호화된 비번
 
         if(!passwordEncoder.matches(rawPassword, encodedPassword)) {
-            throw new RuntimeException("비밀번호가 틀렸습니다.");
+            throw new RuntimeException("wrong-password");
         }
-
-        if(!authenticateLawyer(member))
-            return LoginResponseDTO.builder().authority("notApproval").build();
 
         // 아이디와 비밀번호가 일치할 경우 로그인 성공
         log.info("{}님 로그인 성공!", member.getId());
@@ -141,6 +138,14 @@ public class UserService {
         } else if(member.getAuthority().equals("lawyer")) {
             member.getLawyer().setRefreshToken(tokenDTO.getRefreshToken());
         }
+
+        if(!authenticateLawyer(member))
+            return LoginResponseDTO.builder()
+                    .id(member.getId())
+                    .name(member.getLawyer().getName())
+                    .accessToken(tokenDTO.getAccessToken())
+                    .refreshToken(tokenDTO.getRefreshToken())
+                    .authority("notApproval").build();
 
         memberRepository.save(member);
 
@@ -421,32 +426,22 @@ public class UserService {
         log.info("\n\n\naccessToken - {}", accessToken);
 
         Member member = memberRepository.findById((memberInfo.getId())).orElseThrow();
-
-            if(member.getAuthority().equals("user")) {
-                accessToken = member.getUser().getAccessToken();
-                member.getUser().setRefreshToken(null);
-            } else if(member.getAuthority().equals("lawyer")) {
-                accessToken = member.getLawyer().getAccessToken();
-                member.getLawyer().setRefreshToken(null);
-            }
+        RestTemplate template = new RestTemplate();
 
         // 카카오 로그아웃
-        if(member.getAuthority().equals("user") && member.getUser().getJoinMethod().equals("kakao")) {
+        if(member.getAuthority().equals("user")) {
             String reqUri = "https://kapi.kakao.com/v1/user/logout";
             HttpHeaders headers = new HttpHeaders();
             headers.add("Authorization", "Bearer " + accessToken);
 
-            RestTemplate template = new RestTemplate();
             ResponseEntity<String> responseData
                     = template.exchange(reqUri, HttpMethod.POST, new HttpEntity<>(headers), String.class);
 
             return responseData.getBody();
         }
 
-        // 네이버 로그아웃
-        if(member.getAuthority().equals("user") && member.getUser().getJoinMethod().equals("naver")) {
+        if(member.getUser().getJoinMethod().equals("naver")) {
             String reqUri = "https://nid.naver.com/oauth2.0/token";
-
 
             MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
             params.add("grant_type", "delete");
@@ -460,12 +455,14 @@ public class UserService {
 
             log.info("logout: {}", requestEntity);
 
-            RestTemplate template = new RestTemplate();
             ResponseEntity<String> responseData = template.postForEntity(reqUri, requestEntity, String.class);
-
             return responseData.getBody();
         }
 
+        if(member.getAuthority().equals("lawyer")) {
+            member.getLawyer().setRefreshToken(null);
+        }
+        member.getUser().setRefreshToken(null);
         memberRepository.save(member);
 
         // 카카오 로그인을 한 사람이 아닐 경우
@@ -540,4 +537,8 @@ public class UserService {
     }
 
 
+    public boolean validateReqLogin(LoginRequestDTO dto) {
+        return memberRepository.findById(dto.getId()).isPresent()
+                && memberRepository.findById(dto.getId()).orElseThrow().getAuthority().equals(dto.getReqAuthority());
+    }
 }

@@ -14,8 +14,10 @@ import com.example.demo.consulting.entity.Consulting;
 import com.example.demo.consulting.repository.ConsultingRepository;
 import com.example.demo.freeboard.dto.PageDTO;
 import com.example.demo.freeboard.dto.response.PageResponseDTO;
+import com.example.demo.member.MemberRepository;
 import com.example.demo.member.lawyer.entity.Lawyer;
 import com.example.demo.member.lawyer.repository.LawyerRepository;
+import com.example.demo.member.user.repository.UserRepository;
 import com.example.demo.token.auth.TokenMemberInfo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,12 +26,16 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static com.example.demo.answer.entity.QAnswer.answer;
 
 @Service
 @Slf4j
@@ -42,6 +48,8 @@ public class AnswerService {
     private final LawyerRepository lawyerRepository;
     private final AnswerFileRepository answerFileRepository;
     private final EntityManager em;
+    private final MemberRepository memberRepository;
+    private final UserRepository userRepository;
 
     @Value("${aws.credentials.accessKey}")
     private String accessKey;
@@ -83,10 +91,10 @@ public class AnswerService {
                 .build();
     }
 
-    public AnswerDetailResponseDTO insert(int consultNum, AnswerRegisterRequestDTO requestDTO, TokenMemberInfo tokenMemberInfo) {
+    public AnswerDetailResponseDTO insert(AnswerRegisterRequestDTO requestDTO, TokenMemberInfo tokenMemberInfo) {
 
         Lawyer lawyer = lawyerRepository.findById(tokenMemberInfo.getId()).orElseThrow();
-        Consulting consulting = consultingRepository.findById(consultNum).orElseThrow();
+        Consulting consulting = consultingRepository.findById(requestDTO.getConsultNum()).orElseThrow();
 
         Answer saved = answerRepository.save(requestDTO.toEntity(consulting, lawyer));
 
@@ -126,8 +134,14 @@ public class AnswerService {
         return new DetailedResponseDTO(saved);
     }
 
-    public Answer getDetail(int answerNum) {
-        return answerRepository.findById(answerNum).orElseThrow();
+    public Answer getDetail(int consultNum, TokenMemberInfo tokenMemberInfo) {
+        List<Answer> answerList = consultingRepository.findById(consultNum).orElseThrow().getAnswerList();
+        for(Answer answer : answerList) {
+           if(answer.getAdopt() == 1) {
+               return answerRepository.findById(answer.getAnswerNum()).orElseThrow();
+           }
+        }
+        return null;
     }
 
 
@@ -150,19 +164,25 @@ public class AnswerService {
         return false;
     }
 
-    public boolean validateForDetail(TokenMemberInfo tokenMemberInfo, int answerNum) {
-        Answer answer = answerRepository.findById(answerNum).orElseThrow();
+    public boolean validateForDetail(TokenMemberInfo tokenMemberInfo, int consultNum) {
 
-        if(tokenMemberInfo.getAuthority().equals("lawyer")) {
-            return answer.getLawyer().getLawyerId().equals(
-                    tokenMemberInfo.getId()
-            );
-        } else if(tokenMemberInfo.getAuthority().equals("user")) {
-            return answer.getConsulting().getUser().getId().equals(
-                    tokenMemberInfo.getId()
-            );
+        Consulting consulting = consultingRepository.findById(consultNum).orElseThrow();
+
+        List<Answer> answerList = consulting.getAnswerList();
+
+        // 변호사라면 답변 목록에 요청 보낸 변호사가 있는지 확인
+        if(lawyerRepository.findById(tokenMemberInfo.getId()).isPresent()) {
+            for (Answer answer : answerList) {
+                if (!answer.getLawyer().equals(
+                        lawyerRepository.findById(tokenMemberInfo.getId()).orElseThrow())
+                ) return false;
+            }
+            return true;
+            // 사용자라면 상담글을 작성한 사람인지 확인
+        } else if(userRepository.findById(tokenMemberInfo.getId()).isPresent()) {
+            return consulting.getUser().equals(userRepository.findById(tokenMemberInfo.getId()).orElseThrow());
         }
-        return false;
+        return true;
     }
 
     public boolean validateForRegister(TokenMemberInfo tokenMemberInfo, int consultNum) {
