@@ -63,11 +63,16 @@ public class ConsultingController {
     @PostMapping("/register")
     @PreAuthorize("hasRole('ROLE_user')") // 사용자가 아니라면 인가처리 거부
     public ResponseEntity<?> register(
-            @Validated @RequestPart("consulting") ConsultingRegisterRequestDTO requestDTO,
+            @Validated @RequestPart(value = "requestDTO")  ConsultingRegisterRequestDTO requestDTO,
             @AuthenticationPrincipal TokenMemberInfo tokenMemberInfo,
-            @RequestPart(value="files", required = false)List<MultipartFile> multipartFiles,
+            @RequestPart(value="files", required = false) List<MultipartFile> multipartFiles,
             BindingResult result
     ) {
+
+
+        log.info("dto: {}", requestDTO);
+        log.info("files: {}", multipartFiles);
+
         if(result.hasErrors()) {
             log.warn("DTO 검증 에러 발생: {}", result.getFieldError());
             return ResponseEntity

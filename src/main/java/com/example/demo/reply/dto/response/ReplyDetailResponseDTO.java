@@ -17,6 +17,7 @@ import java.time.LocalDateTime;
 public class ReplyDetailResponseDTO {
 
     private int rno;
+    private int bno;
     private String lawyerId;
     private String userId;
     private String content;
@@ -34,6 +35,7 @@ public class ReplyDetailResponseDTO {
             this.userId = saved.getUser().getId();
         }
         this.rno = saved.getRno();
+        this.bno = saved.getFreeboard().getBno();
         this.content = saved.getContent();
         this.writer = saved.getWriter();
         this.regDate = saved.getRegDate();
