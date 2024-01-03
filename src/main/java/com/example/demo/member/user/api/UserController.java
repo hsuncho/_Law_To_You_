@@ -177,17 +177,6 @@ public class UserController {
     public ResponseEntity<?> naverLogin(@RequestParam String code, @RequestParam String state) {
         log.info("/api/user/naverLogin - GET! -code: {}", code);
 
-        /* 서버 돌릴때 메서드로 변환해서 state에 값 넣으면됨 테스트시 state값 몰라서 테스트를 못함...
-        String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
-        Random random = new SecureRandom();
-        char[] text = new char[12];
-
-        for (int i = 0; i < 12; i++) {
-            text[i] = characters.charAt(random.nextInt(characters.length()));
-        }
-        log.info("state: {}", text);
-        String state = new String(text);
-         */
         LoginResponseDTO responseDTO = userService.naverService(code, state);
 
         return ResponseEntity.ok().body(responseDTO);

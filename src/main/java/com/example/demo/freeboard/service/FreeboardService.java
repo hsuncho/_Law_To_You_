@@ -67,7 +67,7 @@ public class FreeboardService {
                 .collect(Collectors.toList());
 
         return FreeListResponseDTO.builder()
-                .count(detailList.size())
+                .count((int) freeboards.getTotalElements())
                 .pageInfo(new PageResponseDTO(freeboards))
                 .freeboards(detailList)
                 .build();

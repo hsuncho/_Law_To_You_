@@ -18,7 +18,7 @@ public class NaverUserDTO {
         return User.builder()
                 .id(this.id)
                 .email(this.email)
-                .nickname(this.name)
+                .nickname(this.name + "(" + this.id.substring(0,10) + ")")
                 .password("password!")
                 .joinMethod("naver")
                 .accessToken(accessToken)
