@@ -426,21 +426,24 @@ public class UserService {
         log.info("\n\n\naccessToken - {}", accessToken);
 
         Member member = memberRepository.findById((memberInfo.getId())).orElseThrow();
-        RestTemplate template = new RestTemplate();
 
         // 카카오 로그아웃
-        if(member.getAuthority().equals("user")) {
+        if(member.getAuthority().equals("user") && member.getUser().getJoinMethod().equals("kakao")) {
+
+
             String reqUri = "https://kapi.kakao.com/v1/user/logout";
             HttpHeaders headers = new HttpHeaders();
             headers.add("Authorization", "Bearer " + accessToken);
 
+            RestTemplate template = new RestTemplate();
+
             ResponseEntity<String> responseData
                     = template.exchange(reqUri, HttpMethod.POST, new HttpEntity<>(headers), String.class);
 
-            return responseData.getBody();
-        }
+            log.info("logout: {}", responseData);
 
-        if(member.getUser().getJoinMethod().equals("naver")) {
+            return responseData.getBody();
+        }else if(member.getAuthority().equals("user") && member.getUser().getJoinMethod().equals("naver")) {
             String reqUri = "https://nid.naver.com/oauth2.0/token";
 
             MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
@@ -455,15 +458,17 @@ public class UserService {
 
             log.info("logout: {}", requestEntity);
 
+            RestTemplate template = new RestTemplate();
+
             ResponseEntity<String> responseData = template.postForEntity(reqUri, requestEntity, String.class);
             return responseData.getBody();
         }
-
-        if(member.getAuthority().equals("lawyer")) {
-            member.getLawyer().setRefreshToken(null);
-        }
-        member.getUser().setRefreshToken(null);
-        memberRepository.save(member);
+//
+//        if(member.getAuthority().equals("lawyer")) {
+//            member.getLawyer().setRefreshToken(null);
+//        }
+//        member.getUser().setRefreshToken(null);
+//        memberRepository.save(member);
 
         // 카카오 로그인을 한 사람이 아닐 경우
         return null;

@@ -105,6 +105,8 @@ public class ConsultingService {
     public ConsultingDetailResponseDTO insert(final ConsultingRegisterRequestDTO requestDTO, TokenMemberInfo tokenMemberInfo, final List<String> uploadedFileList) throws Exception{
 
         User user = userRepository.findById(tokenMemberInfo.getId()).orElseThrow();
+        user.setHammer(user.getHammer() - 1);
+
         Consulting saved = consultingRepository.save(requestDTO.toEntity(user));
 
         log.info("온라인 상담 글 작성 정상 수행됨! - saved consulting - {}", saved);
@@ -127,6 +129,7 @@ public class ConsultingService {
 //        log.info("foundConsulting: {}", foundConsulting);
 
 //        return new ConsultingDetailResponseDTO(foundConsulting);
+
         return new ConsultingDetailResponseDTO(saved);
     }
 
