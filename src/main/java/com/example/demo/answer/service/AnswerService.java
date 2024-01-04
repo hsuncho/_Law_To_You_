@@ -117,9 +117,8 @@ public class AnswerService {
     }
 
 
-    public DetailedResponseDTO registerDetailed(DetailedRegisterRequestDTO requestDTO, TokenMemberInfo tokenMemberInfo ,List<String> uploadedFileList) {
+    public DetailedResponseDTO registerDetailed(Answer answer, DetailedRegisterRequestDTO requestDTO, TokenMemberInfo tokenMemberInfo ,List<String> uploadedFileList) {
 
-        Answer answer = answerRepository.findById(requestDTO.getAnswerNum()).orElseThrow();
         answer.setDetailAns(requestDTO.getDetailedAns());
         answer.setWriter(lawyerRepository.findById(tokenMemberInfo.getId()).orElseThrow().getName());
 
@@ -200,5 +199,20 @@ public class AnswerService {
                    )) return false;
         }
         return true;
+    }
+
+    public Answer findAnswer(int consultNum, TokenMemberInfo tokenMemberInfo) {
+
+        Consulting consulting = consultingRepository.findById(consultNum).orElseThrow();
+
+        List<Answer> answerList = consulting.getAnswerList();
+        for(Answer answer : answerList) {
+            if(answer.getLawyer().equals(
+                    lawyerRepository.findById(tokenMemberInfo.getId()).orElseThrow()
+            )) {
+                return answer;
+            } else return null;
+        }
+        return null;
     }
 }

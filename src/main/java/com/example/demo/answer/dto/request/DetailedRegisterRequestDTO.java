@@ -12,7 +12,7 @@ import javax.validation.constraints.NotBlank;
 
 public class DetailedRegisterRequestDTO {
 
-    private int answerNum;
+    private int consultNum;
 
     @NotBlank
     private String detailedAns;
