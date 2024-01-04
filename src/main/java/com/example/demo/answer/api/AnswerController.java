@@ -7,6 +7,8 @@ import com.example.demo.answer.repository.AnswerRepository;
 import com.example.demo.consulting.repository.ConsultingRepository;
 import com.example.demo.consulting.service.ConsultingService;
 import com.example.demo.member.lawyer.repository.LawyerRepository;
+import com.example.demo.member.user.entity.User;
+import com.example.demo.member.user.repository.UserRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -44,6 +46,7 @@ public class AnswerController {
     private final S3Service s3Service;
     private final AnswerRepository answerRepository;
     private final LawyerRepository lawyerRepository;
+    private final UserRepository userRepository;
 
     // 토큰 값 얻어오기
     @GetMapping("/status")
@@ -99,7 +102,16 @@ public class AnswerController {
         if(!answerService.validateForAdopt(tokenMemberInfo, answerNum)) {
             return ResponseEntity.badRequest().body("답변 채택에 대한 요청이 승인되지 않았습니다.");
         }
-       AnswerListResponseDTO responseDTO = answerService.adoptShortAns(answerNum, tokenMemberInfo);
+
+        Answer answer = answerRepository.findById(answerNum).orElseThrow();
+
+        User user = userRepository.findById(tokenMemberInfo.getId()).orElseThrow();
+
+        int newHammer = user.getHammer() - answer.getReqHammer();
+        if(newHammer < 0) return ResponseEntity.badRequest().body("shortage-hammer");
+        user.setHammer(newHammer);
+
+       AnswerListResponseDTO responseDTO = answerService.adoptShortAns(answerNum);
        return ResponseEntity.ok().body(responseDTO);
     }
 

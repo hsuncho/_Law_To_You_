@@ -103,16 +103,9 @@ public class AnswerService {
     }
 
 
-    public AnswerListResponseDTO adoptShortAns(int answerNum, TokenMemberInfo tokenMemberInfo) {
+    public AnswerListResponseDTO adoptShortAns(int answerNum) {
 
         Answer answer = answerRepository.findById(answerNum).orElseThrow();
-
-        User user = userRepository.findById(tokenMemberInfo.getId()).orElseThrow();
-
-        int newHammer = user.getHammer() - answer.getReqHammer();
-        if(newHammer < 0) throw new RuntimeException("shortage-hammer");
-
-        user.setHammer(newHammer);
 
         answer.setAdopt(1);
 
