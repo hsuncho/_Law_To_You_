@@ -14,8 +14,8 @@ public class MyConfiguration {
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**")
                         .allowedOrigins("http://localhost:3000")
-                        .allowedOrigins("http://54.180.52.142")
-                        .allowedOrigins("http://law-to-me.site/")
+//                        .allowedOrigins("http://54.180.52.142")
+//                        .allowedOrigins("http://law-to-me.site/")
                         .allowedMethods("GET","POST", "PUT", "DELETE");
             }
         };
