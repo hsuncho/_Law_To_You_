@@ -127,7 +127,7 @@ public class AnswerController {
         log.info("/api/answer/update PUT!! - payload: {}", requestDTO);
 
         if(requestDTO == null) {
-            return ResponseEntity.badRequest().body("등록할 깊은 답변 정보를 전달해 주세요!");
+            return ResponseEntity.badRequest().body("no-request-value");
         }
 
         if(result.hasErrors()) {
@@ -137,18 +137,17 @@ public class AnswerController {
                     .body(result.getFieldError());
         }
 
-        if(answerRepository.findById(requestDTO.getAnswerNum()).orElseThrow().getAdopt() == 0) {
-            return ResponseEntity.badRequest().body("채택되었을 시에만 깊은 답변 등록이 가능합니다.");
-        }
-
-        if(answerRepository.findById(requestDTO.getAnswerNum()).orElseThrow().getDetailAns() != null) {
-            return ResponseEntity.badRequest().body("깊은 답변은 등록 이후에는 수정 불가능한 영역입니다.");
-        }
-
-        if(!(answerRepository.findById(requestDTO.getAnswerNum()).orElseThrow().getLawyer().equals(
-            lawyerRepository.findById(tokenMemberInfo.getId()).orElseThrow())
-        )) {
+        Answer foundAnswer = answerService.findAnswer(requestDTO.getConsultNum(), tokenMemberInfo);
+        if(foundAnswer == null) {
             return ResponseEntity.badRequest().body("wrong-authority");
+        }
+
+        if(foundAnswer.getAdopt() == 0) {
+            return ResponseEntity.badRequest().body("not-adopted-yet");
+        }
+
+        if(foundAnswer.getDetailAns() != null) {
+            return ResponseEntity.badRequest().body("already-registered");
         }
 
         try {
@@ -167,7 +166,7 @@ public class AnswerController {
                 }
             });
 
-            DetailedResponseDTO responseDTO = answerService.registerDetailed(requestDTO, tokenMemberInfo, uploadedFileList);
+            DetailedResponseDTO responseDTO = answerService.registerDetailed(foundAnswer, requestDTO, tokenMemberInfo, uploadedFileList);
             return ResponseEntity.ok().body(responseDTO);
 
         } catch (RuntimeException e) {
