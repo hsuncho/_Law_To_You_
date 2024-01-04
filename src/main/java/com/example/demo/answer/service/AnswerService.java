@@ -117,19 +117,10 @@ public class AnswerService {
     }
 
 
-    public DetailedResponseDTO registerDetailed(Answer answer, DetailedRegisterRequestDTO requestDTO, TokenMemberInfo tokenMemberInfo ,List<String> uploadedFileList) {
+    public DetailedResponseDTO registerDetailed(Answer answer, DetailedRegisterRequestDTO requestDTO, TokenMemberInfo tokenMemberInfo) {
 
         answer.setDetailAns(requestDTO.getDetailedAns());
         answer.setWriter(lawyerRepository.findById(tokenMemberInfo.getId()).orElseThrow().getName());
-
-        uploadedFileList.forEach(file -> {
-            AnswerFile answerFile = new DetailedAnswerFileDTO(file).toEntity(answer);
-            answerFileRepository.save(answerFile);
-        });
-
-        em.flush();
-        em.clear();
-
         Answer saved = answerRepository.save(answer);
 
         return new DetailedResponseDTO(saved);
@@ -201,18 +192,16 @@ public class AnswerService {
         return true;
     }
 
-    public Answer findAnswer(int consultNum, TokenMemberInfo tokenMemberInfo) {
+    public boolean findAnswer(int consultNum, TokenMemberInfo tokenMemberInfo) {
 
         Consulting consulting = consultingRepository.findById(consultNum).orElseThrow();
 
         List<Answer> answerList = consulting.getAnswerList();
         for(Answer answer : answerList) {
-            if(answer.getLawyer().equals(
+            return (answer.getLawyer().equals(
                     lawyerRepository.findById(tokenMemberInfo.getId()).orElseThrow()
-            )) {
-                return answer;
-            } else return null;
+            ));
         }
-        return null;
+        return true;
     }
 }

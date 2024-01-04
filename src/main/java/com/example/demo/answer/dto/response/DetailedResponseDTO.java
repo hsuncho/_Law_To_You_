@@ -15,17 +15,12 @@ public class DetailedResponseDTO {
 
     private String writer;
     private String detailedAns;
-    private List<String> routes;
 
     public DetailedResponseDTO(Answer saved) {
 
         this.detailedAns = saved.getDetailAns();
         this.writer = saved.getWriter();
 
-        this.routes = saved.getAnswerFiles()
-                .stream()
-                .map(AnswerFile::getRoute)
-                .collect(Collectors.toList());
     }
 
 }
