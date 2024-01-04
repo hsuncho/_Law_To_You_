@@ -458,7 +458,7 @@ public class UserService {
             ResponseEntity<String> responseData = template.postForEntity(reqUri, requestEntity, String.class);
             return responseData.getBody();
         }
-        
+
         // 카카오 로그인을 한 사람이 아닐 경우
         return null;
     }
