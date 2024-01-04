@@ -428,8 +428,7 @@ public class UserService {
         Member member = memberRepository.findById((memberInfo.getId())).orElseThrow();
 
         // 카카오 로그아웃
-        if(member.getAuthority().equals("user") && member.getUser().getJoinMethod().equals("kakao")) {
-
+        if(member.getUser().getAuthority().equals("user") && member.getUser().getJoinMethod().equals("kakao")) {
 
             String reqUri = "https://kapi.kakao.com/v1/user/logout";
             HttpHeaders headers = new HttpHeaders();
@@ -443,7 +442,7 @@ public class UserService {
             log.info("logout: {}", responseData);
 
             return responseData.getBody();
-        }else if(member.getAuthority().equals("user") && member.getUser().getJoinMethod().equals("naver")) {
+        } else if(member.getUser().getAuthority().equals("user") && member.getUser().getJoinMethod().equals("naver")) {
             String reqUri = "https://nid.naver.com/oauth2.0/token";
 
             MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
@@ -463,12 +462,6 @@ public class UserService {
             ResponseEntity<String> responseData = template.postForEntity(reqUri, requestEntity, String.class);
             return responseData.getBody();
         }
-//
-//        if(member.getAuthority().equals("lawyer")) {
-//            member.getLawyer().setRefreshToken(null);
-//        }
-//        member.getUser().setRefreshToken(null);
-//        memberRepository.save(member);
 
         // 카카오 로그인을 한 사람이 아닐 경우
         return null;
