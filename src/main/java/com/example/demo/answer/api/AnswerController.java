@@ -4,6 +4,7 @@ import com.example.demo.answer.dto.request.DetailedRegisterRequestDTO;
 import com.example.demo.answer.dto.response.DetailedResponseDTO;
 import com.example.demo.answer.entity.Answer;
 import com.example.demo.answer.repository.AnswerRepository;
+import com.example.demo.consulting.entity.Consulting;
 import com.example.demo.consulting.repository.ConsultingRepository;
 import com.example.demo.consulting.service.ConsultingService;
 import com.example.demo.member.lawyer.repository.LawyerRepository;
@@ -32,6 +33,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 
 @RestController
@@ -47,6 +49,7 @@ public class AnswerController {
     private final AnswerRepository answerRepository;
     private final LawyerRepository lawyerRepository;
     private final UserRepository userRepository;
+    private final ConsultingRepository consultingRepository;
 
     // 토큰 값 얻어오기
     @GetMapping("/status")
@@ -119,9 +122,8 @@ public class AnswerController {
     @PutMapping("/update")
     @PreAuthorize("hasRole('ROLE_lawyer')") // 변호사가 아니라면 인가처리 거부
     public ResponseEntity<?> registerDetailedAns(
-            @Validated @RequestPart("detailedAnswer") DetailedRegisterRequestDTO requestDTO,
+            @Validated @RequestBody DetailedRegisterRequestDTO requestDTO,
             @AuthenticationPrincipal TokenMemberInfo tokenMemberInfo,
-            @RequestPart(value = "files", required = false) List<MultipartFile> multipartFiles,
             BindingResult result
     ) {
         log.info("/api/answer/update PUT!! - payload: {}", requestDTO);
@@ -137,36 +139,31 @@ public class AnswerController {
                     .body(result.getFieldError());
         }
 
-        Answer foundAnswer = answerService.findAnswer(requestDTO.getConsultNum(), tokenMemberInfo);
-        if(foundAnswer == null) {
-            return ResponseEntity.badRequest().body("wrong-authority");
+        Consulting consulting = consultingRepository.findById(requestDTO.getConsultNum()).orElseThrow();
+
+        List<Answer> answerList = consulting.getAnswerList();
+
+        List<Answer> newList= new ArrayList<>();
+
+        for(Answer answer : answerList) {
+            if(answer.getAdopt()==1 && answer.getLawyer().equals(
+                    lawyerRepository.findById(tokenMemberInfo.getId()).orElseThrow()
+            )) {
+                newList.add(answer);
+            } else {
+                return ResponseEntity.badRequest().body("wrong-authority");
+            }
         }
 
-        if(foundAnswer.getAdopt() == 0) {
-            return ResponseEntity.badRequest().body("not-adopted-yet");
-        }
+        log.info("\n\n\nnewList: {}", newList);
 
-        if(foundAnswer.getDetailAns() != null) {
-            return ResponseEntity.badRequest().body("already-registered");
-        }
+        Answer foundAnswer = newList.get(0);
+
+        log.info("\n\n\nfoundAnswer : {}", foundAnswer);
+
 
         try {
-            List<String> uploadedFileList = new ArrayList<>();
-            multipartFiles.forEach( multipartFile -> {
-
-                // 깊은 답변 첨부파일
-                if(multipartFile != null) {
-                    log.info("answer file name: {}", multipartFile.getOriginalFilename());
-
-                    try {
-                        uploadedFileList.add(consultingService.uploadFiles(multipartFile));
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-            });
-
-            DetailedResponseDTO responseDTO = answerService.registerDetailed(foundAnswer, requestDTO, tokenMemberInfo, uploadedFileList);
+            DetailedResponseDTO responseDTO = answerService.registerDetailed(foundAnswer, requestDTO, tokenMemberInfo);
             return ResponseEntity.ok().body(responseDTO);
 
         } catch (RuntimeException e) {
