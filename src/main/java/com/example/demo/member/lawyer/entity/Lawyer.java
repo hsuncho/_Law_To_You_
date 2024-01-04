@@ -82,4 +82,8 @@ public class Lawyer {
     }
 
     public void setApproval() { this.approval = true;}
+
+    public void setAuthority(String lawyer) {
+        this.authority = lawyer;
+    }
 }

@@ -22,6 +22,7 @@ public class MasterService {
         Lawyer lawyer = lawyerRepository.findById(lawyerId).orElseThrow();
         if(!lawyer.isApproval()) {
             lawyer.setApproval();
+//            lawyer.setAuthority("lawyer");
         }
             lawyerRepository.save(lawyer);
     }

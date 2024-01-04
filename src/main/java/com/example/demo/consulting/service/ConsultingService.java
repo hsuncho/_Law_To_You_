@@ -9,6 +9,7 @@ import javax.persistence.EntityManager;
 
 import com.example.demo.answer.entity.Answer;
 import com.example.demo.answer.repository.AnswerRepository;
+import com.example.demo.member.lawyer.repository.LawyerRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -95,7 +96,6 @@ public class ConsultingService {
                 .pageInfo(new PageResponseDTO(consultings))
                .consultingList(detailList)
                 .build();
-
     }
 
     public Optional<Consulting> getDetail(int consultNum) {
@@ -132,6 +132,7 @@ public class ConsultingService {
 
         return new ConsultingDetailResponseDTO(saved);
     }
+
 
     /**
      * 업로드 된 파일을 서버에 저장하고 저장 경로를 리턴
@@ -194,7 +195,7 @@ public class ConsultingService {
         log.info("\n\n\ntokenMemberInfo - {}\n\n\n", tokenMemberInfo);
         log.info("\n\n\ntokenMemberInfo -authority - {}\n\n\n", tokenMemberInfo.getAuthority());
 
-        if(tokenMemberInfo.getAuthority().equals("lawyer")) {
+        if(tokenMemberInfo.getAuthority().equals("lawyer") || equals("notApproval")) {
             return true;
         }
         else if(tokenMemberInfo.getAuthority().equals("user")) {

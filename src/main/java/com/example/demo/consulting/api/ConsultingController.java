@@ -82,11 +82,14 @@ public class ConsultingController {
                     .body(result.getFieldError());
         }
 
+        if(userRepository.findById(tokenMemberInfo.getId()).orElseThrow().getHammer() < 1 ) {
+            return ResponseEntity.badRequest().body("shortage-hammer");
+        }
         try {
-
             List<String> uploadedFileList = new ArrayList<>();
-            multipartFiles.forEach( multipartFile -> {
 
+            if(multipartFiles != null) {
+            multipartFiles.forEach( multipartFile -> {
                 if(multipartFile != null) {
                     log.info("attached file name: {}", multipartFile.getOriginalFilename());
                     try {
@@ -96,15 +99,12 @@ public class ConsultingController {
                     }
                 }
             });
-
-            if(userRepository.findById(tokenMemberInfo.getId()).orElseThrow().getHammer() < 1 ) {
-                return ResponseEntity.badRequest().body("shortage-hammer");
             }
 
             ConsultingDetailResponseDTO responseDTO = consultingService.insert(requestDTO, tokenMemberInfo, uploadedFileList);
             return ResponseEntity.ok().body(responseDTO);
 
-        } catch (RuntimeException e) {
+        }catch (RuntimeException e) {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("온라인 상담 글 생성 중 에러가 발생했습니다.");
@@ -165,19 +165,21 @@ public class ConsultingController {
 
         try {
             List<String> uploadedFileList = new ArrayList<>();
-            multipartFiles.forEach( multipartFile -> {
+            if(multipartFiles != null) {
+                multipartFiles.forEach( multipartFile -> {
 
-                // 깊은 상담 첨부파일
-                if(multipartFile != null) {
-                    log.info("modified attached file name: {}", multipartFile.getOriginalFilename());
-                    try {
-                        uploadedFileList.add(consultingService.uploadFiles(multipartFile));
-                    } catch (IOException e) {
-                        e.printStackTrace();
+                    // 깊은 상담 첨부파일
+                    if(multipartFile != null) {
+                        log.info("modified attached file name: {}", multipartFile.getOriginalFilename());
+                        try {
+                            uploadedFileList.add(consultingService.uploadFiles(multipartFile));
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
                     }
-                }
-            });
+                });
 
+            }
             UpdatedConsultingDetailResponseDTO responseDTO = consultingService.registerDetailedConsulting(requestDTO, uploadedFileList);
             return ResponseEntity.ok().body(responseDTO);
         } catch (RuntimeException e) {
