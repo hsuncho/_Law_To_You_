@@ -63,9 +63,10 @@ public class FreeboardController {
                     .body(result.getFieldError());
         }
 
-        log.info("multipartFile try실행 전 : {}size, {}", multipartFiles.size(),multipartFiles);
+//        log.info("multipartFile try실행 전 : {}size, {}", multipartFiles.size(),multipartFiles);
         try {
             AtomicReference<List<String>> uploadedFileList = new AtomicReference<>(new ArrayList<>());
+            if(multipartFiles != null) {
             multipartFiles.forEach(multipartFile -> {
                 if(multipartFile != null) {
                     log.info("attached file name: {}", multipartFile.getOriginalFilename());
@@ -79,6 +80,7 @@ public class FreeboardController {
                     uploadedFileList.set(new ArrayList<>());
                 }
             });
+            };
 
             FreeboardCreateResponseDTO responseDTO = freeboardService.create(requestDTO, userInfo, uploadedFileList.get());
             return ResponseEntity.ok().body(responseDTO);
@@ -144,10 +146,6 @@ public class FreeboardController {
             @RequestPart(value = "attchedFile", required = false) List<MultipartFile> multipartFiles,
             BindingResult result
     ) {
-
-        if(!freeboardService.userTrue(MemberInfo, requestDTO.getBno())) {
-            return ResponseEntity.ok().body("이 글에 권한이 없습니다.");
-        }
 
             log.info("/api/freeboard/update update 내용: {}", requestDTO);
             ResponseEntity<List<FieldError>> filedErrors = getValidatedResult(result);
