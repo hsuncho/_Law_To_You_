@@ -458,13 +458,7 @@ public class UserService {
             ResponseEntity<String> responseData = template.postForEntity(reqUri, requestEntity, String.class);
             return responseData.getBody();
         }
-
-        if(member.getAuthority().equals("lawyer")) {
-            member.getLawyer().setRefreshToken(null);
-        }
-        member.getUser().setRefreshToken(null);
-        memberRepository.save(member);
-
+        
         // 카카오 로그인을 한 사람이 아닐 경우
         return null;
     }
