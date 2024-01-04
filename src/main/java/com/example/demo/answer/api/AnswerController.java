@@ -6,6 +6,7 @@ import com.example.demo.answer.entity.Answer;
 import com.example.demo.answer.repository.AnswerRepository;
 import com.example.demo.consulting.repository.ConsultingRepository;
 import com.example.demo.consulting.service.ConsultingService;
+import com.example.demo.member.lawyer.repository.LawyerRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -42,6 +43,7 @@ public class AnswerController {
     private final AnswerService answerService;
     private final S3Service s3Service;
     private final AnswerRepository answerRepository;
+    private final LawyerRepository lawyerRepository;
 
     // 토큰 값 얻어오기
     @GetMapping("/status")
@@ -96,10 +98,8 @@ public class AnswerController {
 
         if(!answerService.validateForAdopt(tokenMemberInfo, answerNum)) {
             return ResponseEntity.badRequest().body("답변 채택에 대한 요청이 승인되지 않았습니다.");
-        };
-
-
-       AnswerListResponseDTO responseDTO = answerService.adoptShortAns(answerNum);
+        }
+       AnswerListResponseDTO responseDTO = answerService.adoptShortAns(answerNum, tokenMemberInfo);
        return ResponseEntity.ok().body(responseDTO);
     }
 
@@ -131,6 +131,12 @@ public class AnswerController {
 
         if(answerRepository.findById(requestDTO.getAnswerNum()).orElseThrow().getDetailAns() != null) {
             return ResponseEntity.badRequest().body("깊은 답변은 등록 이후에는 수정 불가능한 영역입니다.");
+        }
+
+        if(!(answerRepository.findById(requestDTO.getAnswerNum()).orElseThrow().getLawyer().equals(
+            lawyerRepository.findById(tokenMemberInfo.getId()).orElseThrow())
+        )) {
+            return ResponseEntity.badRequest().body("wrong-authority");
         }
 
         try {
@@ -169,10 +175,14 @@ public class AnswerController {
         log.info("/api/answer/detial/{} GET", consultNum);
 
         // 깊은 상담 작성자 + 깊은 답변 변호사가 아닐 경우 인가처리 거부하는 메서드
-        if(!answerService.validateForDetail(tokenMemberInfo, consultNum)) {
-            return ResponseEntity.badRequest().body("wrong-authority-request");
-        }
+//        if(!answerService.validateForDetail(tokenMemberInfo, consultNum)) {
+//            return ResponseEntity.badRequest().body("wrong-authority-request");
+//        }
        Answer answer = answerService.getDetail(consultNum, tokenMemberInfo);
+
+        if(answer.getDetailAns()== null) {
+            return ResponseEntity.badRequest().body("no-detailed-answer");
+        }
 
        return ResponseEntity.ok().body(new DetailedResponseDTO(answer));
     }
