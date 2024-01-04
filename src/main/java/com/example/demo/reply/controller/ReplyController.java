@@ -73,7 +73,7 @@ public class ReplyController {
 
     // 댓글 삭제
     @DeleteMapping
-    public ResponseEntity<?> replyDelete(int rno,
+    public ResponseEntity<?> replyDelete(@RequestParam int rno,
                                               @AuthenticationPrincipal TokenMemberInfo userInfo) {
 
         if(!replyService.userTrue(userInfo, rno)) {

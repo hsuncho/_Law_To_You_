@@ -17,6 +17,7 @@ import com.example.demo.freeboard.dto.response.PageResponseDTO;
 import com.example.demo.member.MemberRepository;
 import com.example.demo.member.lawyer.entity.Lawyer;
 import com.example.demo.member.lawyer.repository.LawyerRepository;
+import com.example.demo.member.user.entity.User;
 import com.example.demo.member.user.repository.UserRepository;
 import com.example.demo.token.auth.TokenMemberInfo;
 import lombok.RequiredArgsConstructor;
@@ -102,9 +103,17 @@ public class AnswerService {
     }
 
 
-    public AnswerListResponseDTO adoptShortAns(int answerNum) {
+    public AnswerListResponseDTO adoptShortAns(int answerNum, TokenMemberInfo tokenMemberInfo) {
 
         Answer answer = answerRepository.findById(answerNum).orElseThrow();
+
+        User user = userRepository.findById(tokenMemberInfo.getId()).orElseThrow();
+
+        int newHammer = user.getHammer() - answer.getReqHammer();
+        if(newHammer < 0) throw new RuntimeException("shortage-hammer");
+
+        user.setHammer(newHammer);
+
         answer.setAdopt(1);
 
         return getList(answer.getConsulting().getConsultNum(),
@@ -170,14 +179,16 @@ public class AnswerService {
 
         List<Answer> answerList = consulting.getAnswerList();
 
+        int number = 0;
         // 변호사라면 답변 목록에 요청 보낸 변호사가 있는지 확인
         if(lawyerRepository.findById(tokenMemberInfo.getId()).isPresent()) {
             for (Answer answer : answerList) {
-                if (!answer.getLawyer().equals(
-                        lawyerRepository.findById(tokenMemberInfo.getId()).orElseThrow())
-                ) return false;
+                if(answer.getAdopt() == 1) {
+                    number = answer.getAnswerNum();
+                }
             }
-            return true;
+            return answerRepository.findById(number).orElseThrow().getLawyer().equals(
+                    lawyerRepository.findById(tokenMemberInfo.getId()).orElseThrow());
             // 사용자라면 상담글을 작성한 사람인지 확인
         } else if(userRepository.findById(tokenMemberInfo.getId()).isPresent()) {
             return consulting.getUser().equals(userRepository.findById(tokenMemberInfo.getId()).orElseThrow());

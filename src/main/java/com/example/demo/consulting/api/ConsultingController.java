@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 
 import com.example.demo.answer.entity.Answer;
 import com.example.demo.consulting.repository.ConsultingRepository;
+import com.example.demo.member.user.repository.UserRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -40,6 +41,7 @@ public class ConsultingController {
     private final ConsultingRepository consultingRepository;
     private final ConsultingService consultingService;
     private final S3Service s3Service;
+    private final UserRepository userRepository;
 
     // 토큰 값 얻어오기
     @GetMapping("/status")
@@ -94,6 +96,11 @@ public class ConsultingController {
                     }
                 }
             });
+
+            if(userRepository.findById(tokenMemberInfo.getId()).orElseThrow().getHammer() < 1 ) {
+                return ResponseEntity.badRequest().body("shortage-hammer");
+            }
+
             ConsultingDetailResponseDTO responseDTO = consultingService.insert(requestDTO, tokenMemberInfo, uploadedFileList);
             return ResponseEntity.ok().body(responseDTO);
 
@@ -197,6 +204,8 @@ public class ConsultingController {
         }
         return null;
     }
+
+
 
 
 }
